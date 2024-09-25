@@ -1,4 +1,8 @@
 package org.example.promoserver.Restaurant;
 
-public class RestaurantRepository {
+import org.example.promoserver.Models.Restaurants;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface RestaurantRepository extends JpaRepository<Restaurants, Integer> {
+
 }
