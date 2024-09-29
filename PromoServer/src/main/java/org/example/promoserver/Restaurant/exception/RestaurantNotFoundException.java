@@ -1,4 +1,4 @@
-package org.example.promoserver.Restaurant.exceptions;
+package org.example.promoserver.Restaurant.exception;
 
 import org.example.promoserver.Shared.exceptionhandle.CustomException;
 import org.springframework.http.HttpStatus;

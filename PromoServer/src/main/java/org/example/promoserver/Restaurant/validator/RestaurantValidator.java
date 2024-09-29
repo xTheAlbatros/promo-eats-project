@@ -1,7 +1,7 @@
 package org.example.promoserver.Restaurant.validator;
 
 import org.example.promoserver.Restaurant.dto.AddRestaurant;
-import org.example.promoserver.Restaurant.exceptions.RestaurantBadRequestException;
+import org.example.promoserver.Restaurant.exception.RestaurantBadRequestException;
 import org.springframework.util.StringUtils;
 
 import java.util.Map;
@@ -41,7 +41,7 @@ public class RestaurantValidator {
     }
 
     private static boolean isValidEmail(String email) {
-        return email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z]{2,6}$");
+        return email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
     }
 
     private static boolean isValidOpeningHours(Map<String, String> openingHours) {

@@ -37,7 +37,7 @@ public class Restaurants {
     private Map<String, String> openingHours;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(name = "owner_id")
     private Users users;
 
 

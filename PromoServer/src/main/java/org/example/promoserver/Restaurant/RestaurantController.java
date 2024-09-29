@@ -39,9 +39,15 @@ public class RestaurantController {
         return restaurantService.getAllRestaurant();
     }
 
-    @GetMapping("/restaurants/location")
-    public List<ViewRestaurant> getRestaurantsByLocationAndRange(@RequestBody Location location, @RequestBody Double range){
+    @GetMapping("/restaurants/location/{range}")
+    public List<ViewRestaurant> getRestaurantsByLocationAndRange(@RequestBody Location location, @PathVariable int range){
         return restaurantService.findRestaurantsByLocationAndRange(location, range);
+    }
+
+    @PostMapping("/restaurant/{restaurantId}/owner/{ownerId}")
+    public ResponseEntity<Void> addOwnerToRestaurant(@PathVariable Integer ownerId, @PathVariable Integer restaurantId){
+        restaurantService.addOwnerToRestaurant(ownerId, restaurantId);
+        return ResponseEntity.ok().build();
     }
 
 }

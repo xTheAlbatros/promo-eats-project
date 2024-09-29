@@ -1,5 +1,6 @@
 package org.example.promoserver.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +9,8 @@ import lombok.Setter;
 @Setter
 @Entity
 public class Location {
+
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -16,6 +19,6 @@ public class Location {
 
     private Double Latitude;
 
-    @OneToOne(mappedBy = "location")
-    private Restaurants restaurant;
+    //@OneToOne(mappedBy = "location")
+    //private Restaurants restaurant;
 }

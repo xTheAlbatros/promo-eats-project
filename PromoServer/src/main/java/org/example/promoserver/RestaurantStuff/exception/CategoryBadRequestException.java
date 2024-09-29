@@ -1,15 +1,15 @@
-package org.example.promoserver.Restaurant.exceptions;
+package org.example.promoserver.RestaurantStuff.exception;
 
 import org.example.promoserver.Shared.exceptionhandle.CustomException;
 import org.springframework.http.HttpStatus;
 
-public class RestaurantBadRequestException extends CustomException {
+public class CategoryBadRequestException extends CustomException {
 
-    public RestaurantBadRequestException() {
+    public CategoryBadRequestException() {
         super("Bad Request", HttpStatus.BAD_REQUEST);
     }
 
-    public RestaurantBadRequestException(String message) {
+    public CategoryBadRequestException(String message) {
         super(message, HttpStatus.BAD_REQUEST);
     }
 }
