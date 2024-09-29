@@ -1,18 +1,19 @@
 package org.example.promoserver.Restaurant.dto;
 
-import jakarta.persistence.Column;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import org.example.promoserver.Models.Location;
+
+import java.util.Map;
 
 @Data
-@Getter
-@Setter
 public class ViewRestaurant {
     private String name;
-    private String address;
     private String phone;
     private String email;
     private String webside;
+
+    private Map<String, String> openingHours;
+
+    private Location location;
 
 }

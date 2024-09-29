@@ -1,16 +1,18 @@
 package org.example.promoserver.Restaurant.dto;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import org.example.promoserver.Models.Location;
+
+import java.util.Map;
 
 @Data
-@Getter
-@Setter
 public class AddRestaurant {
     private String name;
-    private String address;
     private String phone;
     private String email;
     private String webside;
+
+    private Map<String, String> openingHours;
+
+    private Location location;
 }

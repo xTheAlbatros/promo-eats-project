@@ -21,12 +21,14 @@ public class Restaurants {
 
     @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
-    private String address;
 
     private String phone;
     private String email;
     private String webside;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "location_id", referencedColumnName = "id")
+    private Location location;
 
     @ElementCollection
     @CollectionTable(name = "restaurant_opening_hours", joinColumns = @JoinColumn(name = "restaurant_id"))
