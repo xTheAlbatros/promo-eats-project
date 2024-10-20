@@ -1,5 +1,6 @@
 package org.example.promoserver.token;
 
+import org.example.promoserver.Models.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -16,5 +17,7 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
     List<Token> findAllValidTokenByUser(Integer id);
 
     Optional<Token> findByToken(String token);
+
+    void deleteAllByUser(Users user);
 }
 

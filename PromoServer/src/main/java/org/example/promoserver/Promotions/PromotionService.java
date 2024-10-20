@@ -41,7 +41,9 @@ public class PromotionService {
 
     @Transactional
     public void deletePromotion(Integer promotionId){
-        promotionRepository.deleteById(promotionId);
+        Optional<Promotions> foundPromotion = Optional.ofNullable(promotionRepository.findById(promotionId)
+                .orElseThrow(PromotionNotFoundException::new));
+        foundPromotion.ifPresent(promotionRepository::delete);
     }
 
 }

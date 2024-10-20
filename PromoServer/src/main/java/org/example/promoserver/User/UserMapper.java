@@ -2,6 +2,7 @@ package org.example.promoserver.User;
 
 import org.example.promoserver.Models.Users;
 import org.example.promoserver.User.dto.RegisterUser;
+import org.example.promoserver.User.dto.ViewUser;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;
@@ -19,5 +20,7 @@ public interface UserMapper {
     @Mapping(target = "accountType", ignore = true)
     @Mapping(target = "password", ignore = true)
     Users toUser(RegisterUser registerUser);
+
+    ViewUser toView(Users users);
 
 }

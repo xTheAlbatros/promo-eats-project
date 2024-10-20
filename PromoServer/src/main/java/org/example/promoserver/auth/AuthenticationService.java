@@ -9,6 +9,7 @@ import org.example.promoserver.Models.Users;
 import org.example.promoserver.User.UserRepository;
 import org.example.promoserver.User.UserService;
 import org.example.promoserver.User.dto.RegisterUser;
+import org.example.promoserver.User.exception.UserNotFoundException;
 import org.example.promoserver.auth.data.AuthenticationRequest;
 import org.example.promoserver.auth.data.AuthenticationResponse;
 import org.example.promoserver.token.JwtService;
@@ -53,7 +54,7 @@ public class AuthenticationService {
                 )
         );
         var user = repository.findByEmail(request.getEmail())
-                .orElseThrow();
+                .orElseThrow(UserNotFoundException::new);
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
@@ -88,10 +89,7 @@ public class AuthenticationService {
     }
 
     @Transactional
-    public void refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws IOException {
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
         final String userEmail;
@@ -102,7 +100,7 @@ public class AuthenticationService {
         userEmail = jwtService.extractUsername(refreshToken);
         if (userEmail != null) {
             var user = this.repository.findByEmail(userEmail)
-                    .orElseThrow();
+                    .orElseThrow(UserNotFoundException::new);
             if (jwtService.isTokenValid(refreshToken, user)) {
                 var accessToken = jwtService.generateToken(user);
                 revokeAllUserTokens(user);
