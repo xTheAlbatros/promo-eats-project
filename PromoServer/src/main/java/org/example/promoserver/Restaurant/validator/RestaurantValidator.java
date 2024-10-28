@@ -54,7 +54,7 @@ public class RestaurantValidator {
     }
 
     private static boolean isValidDayOfWeek(String day) {
-        return day.matches("(?i)Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday");
+        return day.matches("(?i)(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Poniedziałek|Wtorek|Środa|Czwartek|Piątek|Sobota|Niedziela)");
     }
 
     private static boolean isValidHours(String hours) {
