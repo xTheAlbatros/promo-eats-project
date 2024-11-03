@@ -7,6 +7,7 @@ import org.example.promoserver.Models.Users;
 import org.example.promoserver.User.dto.RegisterUser;
 import org.example.promoserver.User.dto.ViewUser;
 import org.example.promoserver.User.exception.UserNotFoundException;
+import org.example.promoserver.User.validator.UserValidator;
 import org.example.promoserver.token.TokenRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,8 @@ public class UserService {
 
     @Transactional
     public Users registerUser(RegisterUser registerUser) {
+
+        UserValidator.validateRegisterUser(registerUser, userRepository);
 
         Users user = userMapper.toUser(registerUser);
 

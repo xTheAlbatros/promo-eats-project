@@ -7,6 +7,7 @@ import java.util.Map;
 
 @Data
 public class ViewRestaurant {
+    private Integer id;
     private String name;
     private String phone;
     private String email;
