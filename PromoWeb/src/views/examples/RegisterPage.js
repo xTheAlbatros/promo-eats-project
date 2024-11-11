@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button, Card, Form, Input, Container, Row, Col, FormFeedback } from "reactstrap";
+import { useNavigate } from "react-router-dom";
 import ExamplesNavbar from "components/Navbars/ExamplesNavbar.js";
 
 function RegisterPage() {
@@ -16,15 +17,17 @@ function RegisterPage() {
     surname: '',
     email: '',
     password: '',
-    username: 'test',
     accountType: 'OWNER'
   });
 
   const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    setErrors({ ...errors, [name]: '' });
   };
 
   const validateForm = () => {
@@ -40,6 +43,7 @@ function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSuccessMessage('');
     if (!validateForm()) return;
 
     try {
@@ -52,14 +56,17 @@ function RegisterPage() {
       });
 
       if (response.ok) {
-        alert('Rejestracja zakończona sukcesem!');
+        setSuccessMessage('Rejestracja zakończona sukcesem!');
+        setTimeout(() => navigate('/index'), 2000);
+      } else if (response.status === 409) {
+        setErrors({ email: 'Podany e-mail jest już zarejestrowany.' });
       } else {
         const errorData = await response.json();
-        alert(`Rejestracja nie powiodła się: ${errorData.message || 'Nieznany błąd'}`);
+        setErrors({ form: errorData.message || 'Nieznany błąd' });
       }
     } catch (error) {
       console.error('Błąd połączenia:', error);
-      alert('Wystąpił błąd podczas połączenia z serwerem.');
+      setErrors({ form: 'Wystąpił błąd podczas połączenia z serwerem.' });
     }
   };
 
@@ -123,20 +130,25 @@ function RegisterPage() {
                     />
                     <FormFeedback>{errors.password}</FormFeedback>
 
-                    <Button block className="btn-round" color="danger" type="submit">
+                    <Button block className="btn-round mt-2" color="success" type="submit">
                       Zarejestruj się
                     </Button>
+                    {errors.form && <p style={{ color: 'red', textAlign: 'center', marginTop: '10px' }}>{errors.form}</p>}
+                    {successMessage && <p style={{ color: 'green', textAlign: 'center', marginTop: '10px' }}>{successMessage}</p>}
                   </Form>
+                  <div className="forgot mt-2">
+                    <Button
+                        className="btn-link"
+                        color="danger"
+                        href="/login-page"
+                    >
+                      Masz już konto? Zaloguj się
+                    </Button>
+                  </div>
                 </Card>
               </Col>
             </Row>
           </Container>
-          <div className="footer register-footer text-center">
-            <h6>
-              © {new Date().getFullYear()}, made with{" "}
-              <i className="fa fa-heart heart" /> by Creative Tim
-            </h6>
-          </div>
         </div>
       </>
   );
