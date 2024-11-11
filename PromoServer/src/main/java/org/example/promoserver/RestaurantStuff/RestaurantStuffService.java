@@ -1,17 +1,22 @@
 package org.example.promoserver.RestaurantStuff;
 
+import jakarta.transaction.Transactional;
+import org.example.promoserver.Models.*;
+import org.example.promoserver.Restaurant.RestaurantMapper;
+import org.example.promoserver.Restaurant.dto.ViewRestaurant;
 import org.example.promoserver.Restaurant.exception.RestaurantNotFoundException;
+import org.example.promoserver.RestaurantStuff.exception.FavouritesNotFoundException;
 import org.example.promoserver.RestaurantStuff.validator.RestaurantStuffValidator;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.promoserver.Models.Categories;
-import org.example.promoserver.Models.Restaurants;
-import org.example.promoserver.Models.RestaurantsCategories;
 import org.example.promoserver.Restaurant.RestaurantRepository;
 import org.example.promoserver.RestaurantStuff.exception.CategoryNotFoundException;
 
+import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -21,6 +26,8 @@ public class RestaurantStuffService {
     private final CategoryRepository categoryRepository;
     private final RestaurantRepository restaurantRepository;
     private final RestaurantsCategoriesRepository restaurantsCategoriesRepository;
+    private final FavouritesRepository favouritesRepository;
+    private final RestaurantMapper restaurantMapper;
 
     public void addCategory(Categories category) {
         RestaurantStuffValidator.checkCategory(category);
@@ -59,5 +66,41 @@ public class RestaurantStuffService {
 
         restaurantsCategoriesRepository.save(restaurantsCategories);
     }
+
+    public void addFavouriteRestaurantForUser(Principal connectedUser, Integer restaurantId) {
+        Restaurants restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(RestaurantNotFoundException::new);
+
+        Users user = (Users) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+
+        favouritesRepository.save(
+                Favourites.builder()
+                .users(user)
+                .restaurants(restaurant)
+                .build());
+    }
+
+    @Transactional
+    public List<ViewRestaurant> getAllFavouritesRestaurantsForUser(Principal connectedUser) {
+        Users user = (Users) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        List<Favourites> favourites = favouritesRepository.findByUsers(user);
+
+        return Optional.ofNullable(favourites)
+                .filter(list -> !list.isEmpty())
+                .map(list -> list.stream()
+                        .map(fav -> restaurantMapper.mapRestaurantsToView(fav.getRestaurants()))
+                        .collect(Collectors.toList()))
+                .orElseThrow(FavouritesNotFoundException::new);
+    }
+
+    @Transactional
+    public void deleteFavouriteRestaurantForUser(Principal connectedUser, Integer restaurantId) {
+        Users user = (Users) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        Restaurants restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(RestaurantNotFoundException::new);
+
+        favouritesRepository.deleteByUsersAndRestaurants(user, restaurant);
+    }
+
 }
 

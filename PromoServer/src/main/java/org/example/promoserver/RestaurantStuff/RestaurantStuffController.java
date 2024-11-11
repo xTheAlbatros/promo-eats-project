@@ -2,9 +2,11 @@ package org.example.promoserver.RestaurantStuff;
 
 import lombok.RequiredArgsConstructor;
 import org.example.promoserver.Models.Categories;
+import org.example.promoserver.Restaurant.dto.ViewRestaurant;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -42,4 +44,20 @@ public class RestaurantStuffController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/restaurant/favourites")
+    public List<ViewRestaurant> getAllFavourites(Principal connectedUser) {
+        return restaurantStuffService.getAllFavouritesRestaurantsForUser(connectedUser);
+    }
+
+    @PostMapping("/restaurant/{id}/favourite")
+    public ResponseEntity<?> addFavouriteRestaurantToUser(@PathVariable Integer id, Principal connectedUser) {
+        restaurantStuffService.addFavouriteRestaurantForUser(connectedUser, id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/restaurant/{id}/favourite")
+    public ResponseEntity<?> deleteFavouriteRestaurantFromUser(@PathVariable Integer id, Principal connectedUser) {
+        restaurantStuffService.deleteFavouriteRestaurantForUser(connectedUser, id);
+        return ResponseEntity.ok().build();
+    }
 }
