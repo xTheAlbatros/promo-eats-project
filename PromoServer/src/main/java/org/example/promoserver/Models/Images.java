@@ -1,6 +1,7 @@
 package org.example.promoserver.Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,7 +24,7 @@ public class Images {
     @Column(nullable = false)
     private String path;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne
     @JoinColumn(name = "promotion_id", nullable = true)
     private Promotions promotion;

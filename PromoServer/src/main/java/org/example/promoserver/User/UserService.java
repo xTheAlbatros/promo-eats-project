@@ -4,14 +4,19 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.promoserver.Models.AccountType;
 import org.example.promoserver.Models.Users;
+import org.example.promoserver.User.dto.ChangePasswordRequest;
 import org.example.promoserver.User.dto.RegisterUser;
 import org.example.promoserver.User.dto.ViewUser;
+import org.example.promoserver.User.exception.UserBadRequestException;
 import org.example.promoserver.User.exception.UserNotFoundException;
+import org.example.promoserver.User.validator.UserValidator;
 import org.example.promoserver.token.TokenRepository;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.example.promoserver.User.exception.InvalidAccountTypeException;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,6 +34,8 @@ public class UserService {
 
     @Transactional
     public Users registerUser(RegisterUser registerUser) {
+
+        UserValidator.validateRegisterUser(registerUser, userRepository);
 
         Users user = userMapper.toUser(registerUser);
 
@@ -67,5 +74,21 @@ public class UserService {
                 .orElseThrow(UserNotFoundException::new));
         tokenRepository.deleteAllByUser(foundUser.get());
         foundUser.ifPresent(userRepository::delete);
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequest request, Principal connectedUser){
+        Users user = (Users) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new UserBadRequestException("Wrong password");
+        }
+        if(!request.getNewPassword().equals(request.getConfirmationPassword())){
+            throw new UserBadRequestException("Passwords do not match");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        userRepository.save(user);
     }
 }

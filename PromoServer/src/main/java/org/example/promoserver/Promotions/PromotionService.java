@@ -6,6 +6,7 @@ import org.example.promoserver.Models.Images;
 import org.example.promoserver.Models.Promotions;
 import org.example.promoserver.Models.Restaurants;
 import org.example.promoserver.Promotions.exceptions.PromotionNotFoundException;
+import org.example.promoserver.Promotions.validator.PromotionValidator;
 import org.example.promoserver.Restaurant.RestaurantRepository;
 import org.example.promoserver.Restaurant.exception.RestaurantNotFoundException;
 import org.springframework.stereotype.Service;
@@ -22,11 +23,18 @@ public class PromotionService {
     private final RestaurantRepository restaurantRepository;
 
     public void savePromotion(Promotions promotions){
+
+        PromotionValidator.validatePromotion(promotions, restaurantRepository);
+
         promotionRepository.save(promotions);
     }
 
     public void saveImage(Images images){
-        imagesRepository.save(images);
+        if(promotionRepository.existsById(images.getId())){
+            imagesRepository.save(images);
+        }else{
+            throw new RestaurantNotFoundException();
+        }
     }
 
     @Transactional
