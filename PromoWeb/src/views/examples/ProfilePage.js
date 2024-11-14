@@ -16,183 +16,238 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
-
-// reactstrap components
+import React, { useEffect, useState } from "react";
 import {
   Button,
-  Label,
-  FormGroup,
-  Input,
-  NavItem,
-  NavLink,
-  Nav,
-  TabContent,
-  TabPane,
   Container,
   Row,
   Col,
+  Form,
+  Input,
+  FormGroup,
+  Label,
+  FormFeedback,
 } from "reactstrap";
+import { useNavigate } from "react-router-dom";
 
-// core components
 import ExamplesNavbar from "components/Navbars/ExamplesNavbar.js";
 import ProfilePageHeader from "components/Headers/ProfilePageHeader.js";
 import DemoFooter from "components/Footers/DemoFooter.js";
 
 function ProfilePage() {
-  const [activeTab, setActiveTab] = React.useState("1");
+  const [userData, setUserData] = useState({});
+  const [changePasswordVisible, setChangePasswordVisible] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmationPassword: "",
+  });
+  const [passwordErrors, setPasswordErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState(""); // Dodano komunikat sukcesu
+  const navigate = useNavigate();
 
-  const toggle = (tab) => {
-    if (activeTab !== tab) {
-      setActiveTab(tab);
+  // Fetch user data from backend
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        navigate("/login-page");
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:8082/api/user/token", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUserData(data);
+        } else {
+          console.error("Failed to fetch user data");
+          navigate("/login-page");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        navigate("/login-page");
+      }
+    };
+
+    fetchUserData();
+  }, [navigate]);
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setPasswordErrors({
+        ...passwordErrors,
+        currentPassword: "Użytkownik nie jest zalogowany.",
+      });
+      return;
+    }
+
+    const errors = {};
+    if (!passwordForm.currentPassword) {
+      errors.currentPassword = "Podaj bieżące hasło.";
+    }
+    if (!passwordForm.newPassword) {
+      errors.newPassword = "Podaj nowe hasło.";
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmationPassword) {
+      errors.confirmationPassword = "Hasła nie pasują do siebie.";
+    }
+
+    setPasswordErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    try {
+      const response = await fetch("http://localhost:8082/api/user/new-password", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+          confirmationPassword: passwordForm.confirmationPassword,
+        }),
+      });
+
+      if (response.ok) {
+        setSuccessMessage("Hasło zostało zmienione pomyślnie!");
+        setPasswordForm({
+          currentPassword: "",
+          newPassword: "",
+          confirmationPassword: "",
+        });
+        setPasswordErrors({});
+        setChangePasswordVisible(false);
+      } else {
+        const errorData = await response.json();
+        setPasswordErrors({
+          ...passwordErrors,
+          currentPassword: errorData.message || "Wystąpił błąd przy zmianie hasła.",
+        });
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      setPasswordErrors({
+        ...passwordErrors,
+        currentPassword: "Błąd połączenia z serwerem.",
+      });
     }
   };
 
-  document.documentElement.classList.remove("nav-open");
-  React.useEffect(() => {
-    document.body.classList.add("landing-page");
-    return function cleanup() {
-      document.body.classList.remove("landing-page");
-    };
-  });
   return (
-    <>
-      <ExamplesNavbar />
-      <ProfilePageHeader />
-      <div className="section profile-content">
-        <Container>
-          <div className="owner">
-            <div className="avatar">
-              <img
-                alt="..."
-                className="img-circle img-no-padding img-responsive"
-                src={require("assets/img/faces/joe-gardner-2.jpg")}
-              />
+      <>
+        <ExamplesNavbar />
+        <ProfilePageHeader />
+        <div className="section profile-content">
+          <Container>
+            <div className="owner">
+              <div className="avatar">
+                <img
+                    alt="..."
+                    className="img-circle img-no-padding img-responsive"
+                    src={require("assets/img/default-avatar.png")}
+                />
+              </div>
+              <div className="name">
+                <h4 className="title">
+                  {userData.name} {userData.surname}
+                  <br />
+                </h4>
+                <h6 className="description">{userData.email}</h6>
+              </div>
             </div>
-            <div className="name">
-              <h4 className="title">
-                Jane Faker <br />
-              </h4>
-              <h6 className="description">Music Producer</h6>
-            </div>
-          </div>
-          <Row>
-            <Col className="ml-auto mr-auto text-center" md="6">
-              <p>
-                An artist of considerable range, Jane Faker — the name taken by
-                Melbourne-raised, Brooklyn-based Nick Murphy — writes, performs
-                and records all of his own music, giving it a warm, intimate
-                feel with a solid groove structure.
-              </p>
-              <br />
-              <Button className="btn-round" color="default" outline>
-                <i className="fa fa-cog" /> Settings
-              </Button>
-            </Col>
-          </Row>
-          <br />
-          <div className="nav-tabs-navigation">
-            <div className="nav-tabs-wrapper">
-              <Nav role="tablist" tabs>
-                <NavItem>
-                  <NavLink
-                    className={activeTab === "1" ? "active" : ""}
+            <Row>
+              <Col className="ml-auto mr-auto text-center" md="6">
+                <Button
+                    className="btn-round"
+                    color="info"
                     onClick={() => {
-                      toggle("1");
+                      setSuccessMessage("");
+                      setChangePasswordVisible(!changePasswordVisible);
                     }}
-                  >
-                    Follows
-                  </NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink
-                    className={activeTab === "2" ? "active" : ""}
-                    onClick={() => {
-                      toggle("2");
-                    }}
-                  >
-                    Following
-                  </NavLink>
-                </NavItem>
-              </Nav>
-            </div>
-          </div>
-          {/* Tab panes */}
-          <TabContent className="following" activeTab={activeTab}>
-            <TabPane tabId="1" id="follows">
-              <Row>
-                <Col className="ml-auto mr-auto" md="6">
-                  <ul className="list-unstyled follows">
-                    <li>
-                      <Row>
-                        <Col className="ml-auto mr-auto" lg="2" md="4" xs="4">
-                          <img
-                            alt="..."
-                            className="img-circle img-no-padding img-responsive"
-                            src={require("assets/img/faces/clem-onojeghuo-2.jpg")}
-                          />
-                        </Col>
-                        <Col className="ml-auto mr-auto" lg="7" md="4" xs="4">
-                          <h6>
-                            Flume <br />
-                            <small>Musical Producer</small>
-                          </h6>
-                        </Col>
-                        <Col className="ml-auto mr-auto" lg="3" md="4" xs="4">
-                          <FormGroup check>
-                            <Label check>
-                              <Input
-                                defaultChecked
-                                defaultValue=""
-                                type="checkbox"
-                              />
-                              <span className="form-check-sign" />
-                            </Label>
-                          </FormGroup>
-                        </Col>
-                      </Row>
-                    </li>
-                    <hr />
-                    <li>
-                      <Row>
-                        <Col className="mx-auto" lg="2" md="4" xs="4">
-                          <img
-                            alt="..."
-                            className="img-circle img-no-padding img-responsive"
-                            src={require("assets/img/faces/ayo-ogunseinde-2.jpg")}
-                          />
-                        </Col>
-                        <Col lg="7" md="4" xs="4">
-                          <h6>
-                            Banks <br />
-                            <small>Singer</small>
-                          </h6>
-                        </Col>
-                        <Col lg="3" md="4" xs="4">
-                          <FormGroup check>
-                            <Label check>
-                              <Input defaultValue="" type="checkbox" />
-                              <span className="form-check-sign" />
-                            </Label>
-                          </FormGroup>
-                        </Col>
-                      </Row>
-                    </li>
-                  </ul>
-                </Col>
-              </Row>
-            </TabPane>
-            <TabPane className="text-center" tabId="2" id="following">
-              <h3 className="text-muted">Not following anyone yet :(</h3>
-              <Button className="btn-round" color="warning">
-                Find artists
-              </Button>
-            </TabPane>
-          </TabContent>
-        </Container>
-      </div>
-      <DemoFooter />
-    </>
+                >
+                  Zmień hasło
+                </Button>
+                {changePasswordVisible && (
+                    <Form onSubmit={handlePasswordChange} className="mt-3">
+                      <FormGroup>
+                        <Label for="currentPassword">Bieżące hasło</Label>
+                        <Input
+                            type="password"
+                            id="currentPassword"
+                            name="currentPassword"
+                            placeholder="Wpisz swoje bieżące hasło"
+                            value={passwordForm.currentPassword}
+                            onChange={(e) =>
+                                setPasswordForm({
+                                  ...passwordForm,
+                                  currentPassword: e.target.value,
+                                })
+                            }
+                            invalid={!!passwordErrors.currentPassword}
+                        />
+                        <FormFeedback>{passwordErrors.currentPassword}</FormFeedback>
+                      </FormGroup>
+                      <FormGroup>
+                        <Label for="newPassword">Nowe hasło</Label>
+                        <Input
+                            type="password"
+                            id="newPassword"
+                            name="newPassword"
+                            placeholder="Wpisz nowe hasło"
+                            value={passwordForm.newPassword}
+                            onChange={(e) =>
+                                setPasswordForm({
+                                  ...passwordForm,
+                                  newPassword: e.target.value,
+                                })
+                            }
+                            invalid={!!passwordErrors.newPassword}
+                        />
+                        <FormFeedback>{passwordErrors.newPassword}</FormFeedback>
+                      </FormGroup>
+                      <FormGroup>
+                        <Label for="confirmationPassword">Potwierdź nowe hasło</Label>
+                        <Input
+                            type="password"
+                            id="confirmationPassword"
+                            name="confirmationPassword"
+                            placeholder="Potwierdź nowe hasło"
+                            value={passwordForm.confirmationPassword}
+                            onChange={(e) =>
+                                setPasswordForm({
+                                  ...passwordForm,
+                                  confirmationPassword: e.target.value,
+                                })
+                            }
+                            invalid={!!passwordErrors.confirmationPassword}
+                        />
+                        <FormFeedback>{passwordErrors.confirmationPassword}</FormFeedback>
+                      </FormGroup>
+                      <Button color="success" type="submit">
+                        Zmień hasło
+                      </Button>
+                    </Form>
+                )}
+                {successMessage && (
+                    <p style={{ color: "green", marginTop: "10px" }}>{successMessage}</p>
+                )}
+              </Col>
+            </Row>
+          </Container>
+        </div>
+        <DemoFooter />
+      </>
   );
 }
 

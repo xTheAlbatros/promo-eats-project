@@ -37,10 +37,12 @@ function LoginPage() {
             });
 
             if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('access_token', data.access_token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+
                 setSuccessMessage('Logowanie zakończone sukcesem!');
-                setTimeout(async () => {
-                    const data = await response.json();
-                    localStorage.setItem('token', data.token);
+                setTimeout(() => {
                     navigate('/index');
                 }, 2000);
             } else {
@@ -51,7 +53,6 @@ function LoginPage() {
             setLoginError('Wystąpił błąd podczas logowania.');
         }
     };
-
 
     return (
         <>
