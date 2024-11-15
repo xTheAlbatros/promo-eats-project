@@ -22,44 +22,50 @@ import React from "react";
 // reactstrap components
 import { Container } from "reactstrap";
 
-// core components
-
 function IndexHeader() {
-  return (
-    <>
-      <div
-        className="page-header section-dark"
-        style={{
-          backgroundImage:
-            "url(" + require("assets/img/antoine-barres.jpg") + ")",
-        }}
-      >
-        <div className="filter" />
-        <div className="content-center">
-          <Container>
-            <div className="title-brand">
-              <h1 className="presentation-title">Paper Kit React</h1>
-              <div className="fog-low">
-                <img alt="..." src={require("assets/img/fog-low.png")} />
-              </div>
-              <div className="fog-low right">
-                <img alt="..." src={require("assets/img/fog-low.png")} />
-              </div>
+    return (
+        <>
+            <div
+                className="page-header section-dark"
+                style={{
+                    backgroundImage:
+                        "url(" + require("assets/img/antoine-barres.jpg") + ")",
+                }}
+            >
+                <div className="filter" />
+                <div className="content-center">
+                    <Container>
+                        <div className="title-brand">
+                            <h1 className="presentation-title">PromoEats</h1>
+                        </div>
+                        <h2 className="presentation-subtitle text-center">
+                            Dołącz do nas i promuj swoje oferty gastranomiczne!
+                        </h2>
+                        <p className="text-center mt-4 text-light">
+                            Wypełnij formularz, aby dodać swoją restaurację!
+                        </p>
+                        <div className="text-center mt-3">
+                            {/* Link do sekcji formularza */}
+                            <a
+                                href="#add-restaurant"
+                                className="btn-arrow"
+                                aria-label="Przejdź do formularza dodawania restauracji"
+                            >
+                                ↓
+                            </a>
+                        </div>
+                    </Container>
+                </div>
+                {/*<div*/}
+                {/*    className="moving-clouds"*/}
+                {/*    style={{*/}
+                {/*        backgroundImage: "url(" + require("assets/img/clouds.png") + ")",*/}
+                {/*    }}*/}
+                {/*/>*/}
             </div>
-            <h2 className="presentation-subtitle text-center">
-              Make your mark with a Free Bootstrap 4 (Reactstrap) UI Kit!
-            </h2>
-          </Container>
-        </div>
-        <div
-          className="moving-clouds"
-          style={{
-            backgroundImage: "url(" + require("assets/img/clouds.png") + ")",
-          }}
-        />
-      </div>
-    </>
-  );
+        </>
+    );
 }
 
 export default IndexHeader;
+
