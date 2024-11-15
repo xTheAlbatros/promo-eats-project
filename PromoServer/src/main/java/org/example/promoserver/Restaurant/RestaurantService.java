@@ -12,8 +12,10 @@ import org.example.promoserver.Restaurant.validator.RestaurantValidator;
 import org.example.promoserver.Shared.DistanceCalculator;
 import org.example.promoserver.User.UserRepository;
 import org.example.promoserver.User.exception.UserNotFoundException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,6 +34,18 @@ public class RestaurantService {
     @Transactional
     public List<ViewRestaurant> getAllRestaurant() {
         List<Restaurants> restaurants = restaurantRepository.findAll();
+        return Optional.ofNullable(restaurants)
+                .filter(list -> !list.isEmpty())
+                .map(list -> list.stream()
+                        .map(restaurantMapper::mapRestaurantsToView)
+                        .collect(Collectors.toList()))
+                .orElseThrow(RestaurantNotFoundException::new);
+    }
+
+    @Transactional
+    public List<ViewRestaurant> getAllRestaurantForOwner(Principal connectedUser) {
+        Users user = (Users) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        List<Restaurants> restaurants = restaurantRepository.findAllByUsers(user);
 
         return Optional.ofNullable(restaurants)
                 .filter(list -> !list.isEmpty())
@@ -41,10 +55,12 @@ public class RestaurantService {
                 .orElseThrow(RestaurantNotFoundException::new);
     }
 
-
-    public void saveRestaurant(AddRestaurant addRestaurant){
+    @Transactional
+    public void saveRestaurant(AddRestaurant addRestaurant, Principal connectedUser){
+        Users user = (Users) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         RestaurantValidator.validateAddRestaurant(addRestaurant);
         Restaurants restaurant = restaurantMapper.mapAddToRestaurants(addRestaurant);
+        restaurant.setUsers(user);
         restaurantRepository.save(restaurant);
     }
 

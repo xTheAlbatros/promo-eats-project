@@ -8,6 +8,7 @@ import org.example.promoserver.Restaurant.dto.ViewRestaurant;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -18,8 +19,8 @@ public class RestaurantController {
     private final RestaurantService restaurantService;
 
     @PostMapping("/restaurant")
-    public ResponseEntity<Void> addRestaurant(@RequestBody AddRestaurant addRestaurant){
-        restaurantService.saveRestaurant(addRestaurant);
+    public ResponseEntity<Void> addRestaurant(@RequestBody AddRestaurant addRestaurant, Principal connectedUser){
+        restaurantService.saveRestaurant(addRestaurant, connectedUser);
         return ResponseEntity.ok().build();
     }
 
@@ -37,6 +38,11 @@ public class RestaurantController {
     @GetMapping("/restaurants")
     public List<ViewRestaurant> getAllRestaurants(){
         return restaurantService.getAllRestaurant();
+    }
+
+    @GetMapping("/restaurants/owner")
+    public List<ViewRestaurant> getAllRestaurantsForOwner(Principal connectedUser){
+        return restaurantService.getAllRestaurantForOwner(connectedUser);
     }
 
     @GetMapping("/restaurants/location")
