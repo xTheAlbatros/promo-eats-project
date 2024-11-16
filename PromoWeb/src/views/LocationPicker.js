@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -18,7 +18,7 @@ const LocationPicker = ({ onLocationSelect }) => {
     const [error, setError] = useState("");
 
     const LocationMarker = () => {
-        useMapEvents({
+        const map = useMapEvents({
             click(e) {
                 const { lat, lng } = e.latlng;
                 setSelectedPosition({ lat, lng });
@@ -26,14 +26,23 @@ const LocationPicker = ({ onLocationSelect }) => {
             },
         });
 
+        // Zabezpieczenie przed błędem _leaflet_pos
+        useEffect(() => {
+            if (!map) return;
+            map.invalidateSize();
+        }, [map]);
+
         return selectedPosition ? <Marker position={selectedPosition} icon={customIcon} /> : null;
     };
 
     const MoveToLocation = ({ position }) => {
         const map = useMap();
-        if (position) {
-            map.setView(position, 15);
-        }
+        useEffect(() => {
+            if (map && position) {
+                map.setView(position, 15);
+            }
+        }, [map, position]);
+
         return null;
     };
 

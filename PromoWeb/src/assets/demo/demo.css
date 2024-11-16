@@ -732,3 +732,21 @@
   color: white;
   border-color: #0056b3;
 }
+
+.promotion-card {
+  background-color: #333; /* Ciemne tło dla kontrastu */
+  color: #fff; /* Biały tekst dla lepszej widoczności */
+  border: 1px solid #555; /* Delikatna ramka */
+  border-radius: 8px; /* Zaokrąglone rogi */
+  padding: 15px;
+  margin-bottom: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Lekki cień */
+}
+
+.promotion-card h5 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+

@@ -118,12 +118,12 @@ function IndexNavbar() {
               ) : (
                   <>
                     <NavItem>
-                      <Button color="link" onClick={handleProfileClick} style={{ cursor: "pointer", color: "white" }}>
+                      <Button color="link" onClick={handleProfileClick} className="nav-link" style={{ cursor: "pointer", color: "white" }}>
                         Profil
                       </Button>
                     </NavItem>
                     <NavItem>
-                      <Link onClick={handleLogout} className="nav-link" style={{ cursor: "pointer" }}>
+                      <Link color="link" onClick={handleLogout} className="nav-link" style={{ cursor: "pointer", color: "white" }}>
                         Wyloguj
                       </Link>
                     </NavItem>
