@@ -717,3 +717,18 @@
   margin-top: 20px;
   margin-bottom: 50px;
 }
+
+.category-item {
+  display: inline-block;
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.category-item.selected {
+  background-color: #007bff;
+  color: white;
+  border-color: #0056b3;
+}

@@ -56,11 +56,12 @@ function IndexNavbar() {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
       }
-      navigate("/index"); // Przekieruj na stronę główną
+      window.location.reload();
     } catch (error) {
       console.error("Błąd podczas wylogowywania:", error);
     }
   };
+
 
   React.useEffect(() => {
     const updateNavbarColor = () => {

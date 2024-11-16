@@ -26,19 +26,24 @@ import {
   FormGroup,
   Label,
   Input,
-  FormFeedback,
   Card,
   CardBody,
   CardTitle,
   CardSubtitle,
+  FormFeedback,
 } from "reactstrap";
+import { Link } from "react-router-dom";
 import IndexNavbar from "components/Navbars/IndexNavbar.js";
 import IndexHeader from "components/Headers/IndexHeader.js";
 import DemoFooter from "components/Footers/DemoFooter.js";
+import LocationPicker from "./LocationPicker";
 
 function Index() {
   const [restaurants, setRestaurants] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState({});
   const [isAddingRestaurant, setIsAddingRestaurant] = useState(false);
+  const [categoryMenuOpen, setCategoryMenuOpen] = useState({});
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -58,34 +63,115 @@ function Index() {
   const [formErrors, setFormErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [confirmationId, setConfirmationId] = useState(null);
+
+  const isLoggedIn = !!localStorage.getItem("access_token");
 
   useEffect(() => {
-    const fetchRestaurants = async () => {
-      try {
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-          setErrorMessage("Użytkownik nie jest zalogowany.");
-          return;
-        }
+    if (isLoggedIn) {
+      fetchOwnerRestaurants();
+      fetchCategories();
+    }
+  }, [isLoggedIn]);
 
-        const response = await fetch("http://localhost:8082/api/restaurants", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  const fetchOwnerRestaurants = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await fetch("http://localhost:8082/api/restaurants/owner", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        if (response.ok) {
-          const data = await response.json();
-          setRestaurants(data);
-        } else {
-          setErrorMessage("Nie udało się pobrać listy restauracji.");
-        }
-      } catch (error) {
-        console.error("Błąd połączenia z serwerem:", error);
-        setErrorMessage("Nie udało się połączyć z serwerem.");
+      if (response.ok) {
+        const data = await response.json();
+        setRestaurants(data);
       }
-    };
+    } catch (error) {
+      console.error("Błąd połączenia z serwerem:", error);
+    }
+  };
 
-    fetchRestaurants();
-  }, []);
+  const fetchCategories = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await fetch("http://localhost:8082/api/categories", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error("Błąd podczas pobierania kategorii:", error);
+    }
+  };
+
+  const handleCategoryChange = (restaurantId, categoryId) => {
+    setSelectedCategories((prev) => {
+      const currentCategories = prev[restaurantId] || [];
+      const isSelected = currentCategories.includes(categoryId);
+
+      return {
+        ...prev,
+        [restaurantId]: isSelected
+            ? currentCategories.filter((id) => id !== categoryId)
+            : [...currentCategories, categoryId],
+      };
+    });
+  };
+
+  const handleSaveCategories = async (restaurantId) => {
+    const token = localStorage.getItem("access_token");
+    const categoriesToSave = selectedCategories[restaurantId] || [];
+
+    try {
+      for (const categoryId of categoriesToSave) {
+        await fetch(
+            `http://localhost:8082/restaurant/${restaurantId}/category/${categoryId}`,
+            {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+            }
+        );
+      }
+      alert("Kategorie zostały zapisane.");
+    } catch (error) {
+      console.error("Błąd podczas zapisywania kategorii:", error);
+    }
+  };
+
+  const toggleCategoryMenu = (restaurantId) => {
+    setCategoryMenuOpen((prev) => ({
+      ...prev,
+      [restaurantId]: !prev[restaurantId],
+    }));
+  };
+
+  const confirmDeleteRestaurant = async (restaurantId) => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await fetch(
+          `http://localhost:8082/api/restaurant/${restaurantId}`,
+          {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+      );
+
+      if (response.ok) {
+        setRestaurants((prev) =>
+            prev.filter((restaurant) => restaurant.id !== restaurantId)
+        );
+        setConfirmationId(null);
+      } else {
+        console.error("Nie udało się usunąć restauracji:", response.statusText);
+        alert("Wystąpił problem podczas usuwania restauracji.");
+      }
+    } catch (error) {
+      console.error("Błąd połączenia z serwerem:", error);
+      alert("Nie udało się połączyć z serwerem.");
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -100,15 +186,20 @@ function Index() {
     });
   };
 
+  const handleLocationSelect = (location) => {
+    setFormData({
+      ...formData,
+      location: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
+    });
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
     const token = localStorage.getItem("access_token");
-    if (!token) {
-      setErrorMessage("Użytkownik nie jest zalogowany.");
-      return;
-    }
-
     const errors = {};
     if (!formData.name) errors.name = "Nazwa restauracji jest wymagana.";
     if (!formData.email) errors.email = "Email restauracji jest wymagany.";
@@ -146,6 +237,7 @@ function Index() {
       }
 
       setSuccessMessage("Restauracja została dodana pomyślnie!");
+      setTimeout(() => setSuccessMessage(""), 3000);
       setIsAddingRestaurant(false);
       setFormData({
         name: "",
@@ -163,13 +255,8 @@ function Index() {
         },
         location: { latitude: "", longitude: "" },
       });
-      const updatedRestaurants = await fetch(
-          "http://localhost:8082/api/restaurants",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-      ).then((res) => res.json());
-      setRestaurants(updatedRestaurants);
+
+      fetchOwnerRestaurants();
     } catch (error) {
       console.error("Błąd połączenia z serwerem:", error);
       setErrorMessage("Nie udało się połączyć z serwerem.");
@@ -187,46 +274,129 @@ function Index() {
               <div className="restaurant-list">
                 {restaurants.map((restaurant) => (
                     <Card key={restaurant.id} className="mb-3 shadow-sm">
-                      <CardBody>
-                        <CardTitle tag="h5" className="text-warning">
-                          {restaurant.name}
-                        </CardTitle>
-                        <CardSubtitle className="mb-2 phone">
-                          Telefon:{" "}
-                          <span className="text-success">{restaurant.phone}</span>
-                        </CardSubtitle>
-                        <a
-                            href={restaurant.webside}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-success"
-                        >
-                          {restaurant.webside}
-                        </a>
+                      <CardBody className="d-flex flex-column">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <CardTitle tag="h5" className="text-warning">
+                              {restaurant.name}
+                            </CardTitle>
+                            <CardSubtitle className="mb-2 phone">
+                              Telefon: <span className="text-success">{restaurant.phone}</span>
+                            </CardSubtitle>
+                            <a
+                                href={restaurant.webside}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-success"
+                            >
+                              {restaurant.webside}
+                            </a>
+                          </div>
+                          <Button
+                              color="danger"
+                              className="mt-3"
+                              onClick={() => setConfirmationId(restaurant.id)}
+                          >
+                            Usuń
+                          </Button>
+                        </div>
+                        {confirmationId === restaurant.id && (
+                            <div className="text-center mt-3">
+                              <p>Czy na pewno chcesz usunąć tę restaurację?</p>
+                              <Button
+                                  color="success"
+                                  onClick={() => confirmDeleteRestaurant(restaurant.id)}
+                                  style={{ marginRight: "10px" }}
+                              >
+                                Tak
+                              </Button>
+                              <Button
+                                  color="danger"
+                                  onClick={() => setConfirmationId(null)}
+                              >
+                                Nie
+                              </Button>
+                            </div>
+                        )}
+                        <div className="mt-3">
+                          <Button
+                              color="primary"
+                              className="mt-2"
+                              onClick={() => toggleCategoryMenu(restaurant.id)}
+                          >
+                            Wybierz kategorie dla restauracji
+                          </Button>
+                          {categoryMenuOpen[restaurant.id] && (
+                              <div className="mt-2">
+                                <h6 className="text-muted">Kategorie:</h6>
+                                <div className="categories-container">
+                                  {categories.map((category) => (
+                                      <div
+                                          key={category.id}
+                                          className={`category-item ${
+                                              selectedCategories[restaurant.id]?.includes(category.id)
+                                                  ? "selected"
+                                                  : ""
+                                          }`}
+                                          onClick={() => handleCategoryChange(restaurant.id, category.id)}
+                                      >
+                                        {category.name}
+                                      </div>
+                                  ))}
+                                </div>
+                                <div className="form-button-container">
+                                <Button
+                                    color="success"
+                                    className="mt-2"
+                                    onClick={() => handleSaveCategories(restaurant.id)}
+                                >
+                                  Zapisz kategorie
+                                </Button>
+                                </div>
+                              </div>
+                          )}
+                        </div>
                       </CardBody>
                     </Card>
                 ))}
-                {restaurants.length === 0 && (
-                    <p className="text-center text-muted">
+                {restaurants.length === 0 && isLoggedIn && (
+                    <h4 className="text-center text-muted text-primary">
                       Brak restauracji do wyświetlenia.
-                    </p>
+                    </h4>
+                )}
+                {!isLoggedIn && (
+                    <>
+                      <h4 className="text-center text-muted text-primary">
+                        Załóż konto, żeby móc dodawać restauracje
+                      </h4>
+                      <div className="form-button-container">
+                        <Link to="/register-page">
+                          <Button color="primary">Zarejestruj się</Button>
+                        </Link>
+                      </div>
+                    </>
                 )}
               </div>
             </Col>
           </Row>
 
-          <Row id="add-restaurant" className="form-button-container">
-            <Col className="text-center">
-              <Button
-                  color="primary"
-                  onClick={() => setIsAddingRestaurant(!isAddingRestaurant)}
-              >
-                {isAddingRestaurant ? "Anuluj" : "Dodaj Restaurację"}
-              </Button>
-            </Col>
-          </Row>
+          {isLoggedIn && (
+              <Row id="add-restaurant" className="form-button-container">
+                <Col className="text-center">
+                  <Button
+                      color="primary"
+                      onClick={() => {
+                        setIsAddingRestaurant(!isAddingRestaurant);
+                        setSuccessMessage("");
+                      }}
+                  >
+                    {isAddingRestaurant ? "Anuluj" : "Dodaj Restaurację"}
+                  </Button>
+                </Col>
+              </Row>
+          )}
 
-          {isAddingRestaurant && (
+          {isLoggedIn && isAddingRestaurant && (
               <Row className="mt-3">
                 <Col>
                   <Form onSubmit={handleFormSubmit}>
@@ -293,41 +463,12 @@ function Index() {
                       <FormFeedback>{formErrors.openingHours}</FormFeedback>
                     </FormGroup>
                     <FormGroup>
-                      <Label for="latitude">Szerokość geograficzna</Label>
-                      <Input
-                          type="number"
-                          name="latitude"
-                          id="latitude"
-                          value={formData.location.latitude}
-                          onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                location: {
-                                  ...formData.location,
-                                  latitude: e.target.value,
-                                },
-                              })
-                          }
-                      />
+                      <Label>Wybierz lokalizację na mapie lub wpisz adres poniżej</Label>
+                      <LocationPicker onLocationSelect={handleLocationSelect} />
                     </FormGroup>
-                    <FormGroup>
-                      <Label for="longitude">Długość geograficzna</Label>
-                      <Input
-                          type="number"
-                          name="longitude"
-                          id="longitude"
-                          value={formData.location.longitude}
-                          onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                location: {
-                                  ...formData.location,
-                                  longitude: e.target.value,
-                                },
-                              })
-                          }
-                      />
-                    </FormGroup>
+                    <p>
+                      Wybrana lokalizacja: {formData.location.latitude}, {formData.location.longitude}
+                    </p>
                     {successMessage && (
                         <p className="text-success">{successMessage}</p>
                     )}
@@ -339,13 +480,12 @@ function Index() {
                         Dodaj restaurację
                       </Button>
                     </div>
-
                   </Form>
                 </Col>
               </Row>
           )}
         </Container>
-        <DemoFooter/>
+        <DemoFooter />
       </>
   );
 }
