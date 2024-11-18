@@ -2,6 +2,7 @@ package org.example.promoserver.RestaurantStuff;
 
 import lombok.RequiredArgsConstructor;
 import org.example.promoserver.Models.Categories;
+import org.example.promoserver.Models.Reviews;
 import org.example.promoserver.Restaurant.dto.ViewRestaurant;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,8 @@ import java.util.List;
 public class RestaurantStuffController {
 
     private final RestaurantStuffService restaurantStuffService;
+
+    //Category Section
 
     @PostMapping("/category")
     public ResponseEntity<Void> addCategory(@RequestBody Categories category) {
@@ -44,6 +47,8 @@ public class RestaurantStuffController {
         return ResponseEntity.ok().build();
     }
 
+    //Favourites Section
+
     @GetMapping("/restaurant/favourites")
     public List<ViewRestaurant> getAllFavourites(Principal connectedUser) {
         return restaurantStuffService.getAllFavouritesRestaurantsForUser(connectedUser);
@@ -58,6 +63,31 @@ public class RestaurantStuffController {
     @DeleteMapping("/restaurant/{id}/favourite")
     public ResponseEntity<?> deleteFavouriteRestaurantFromUser(@PathVariable Integer id, Principal connectedUser) {
         restaurantStuffService.deleteFavouriteRestaurantForUser(connectedUser, id);
+        return ResponseEntity.ok().build();
+    }
+
+    //Reviews Section
+
+    @GetMapping("/restaurant/{id}/reviews")
+    public List<Reviews> getAllReviewsForRestaurant(@PathVariable Integer id) {
+        return restaurantStuffService.getAllReviewsForRestaurant(id);
+    }
+
+    @PostMapping("/restaurant/review")
+    public ResponseEntity<?> addReviewToRestaurant(@RequestBody Reviews reviews, Principal connectedUser) {
+        restaurantStuffService.addReviewToRestaurant(connectedUser, reviews);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/restaurant/review/{id}")
+    public ResponseEntity<?> deleteReviewFromRestaurant(@PathVariable Integer id) {
+        restaurantStuffService.deleteReviewFromRestaurant(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/restaurant/review")
+    public ResponseEntity<?> updateReview(@RequestBody Reviews reviews, Principal connectedUser) {
+        restaurantStuffService.updateReview(connectedUser, reviews);
         return ResponseEntity.ok().build();
     }
 }

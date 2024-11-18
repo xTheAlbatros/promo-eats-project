@@ -6,6 +6,8 @@ import org.example.promoserver.Restaurant.RestaurantMapper;
 import org.example.promoserver.Restaurant.dto.ViewRestaurant;
 import org.example.promoserver.Restaurant.exception.RestaurantNotFoundException;
 import org.example.promoserver.RestaurantStuff.exception.FavouritesNotFoundException;
+import org.example.promoserver.RestaurantStuff.exception.ReviewNotFoundException;
+import org.example.promoserver.RestaurantStuff.exception.ReviewUnauthorizedException;
 import org.example.promoserver.RestaurantStuff.validator.RestaurantStuffValidator;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ public class RestaurantStuffService {
     private final RestaurantsCategoriesRepository restaurantsCategoriesRepository;
     private final FavouritesRepository favouritesRepository;
     private final RestaurantMapper restaurantMapper;
+    private final ReviewsRepository reviewsRepository;
 
     public void addCategory(Categories category) {
         RestaurantStuffValidator.checkCategory(category);
@@ -100,6 +103,64 @@ public class RestaurantStuffService {
                 .orElseThrow(RestaurantNotFoundException::new);
 
         favouritesRepository.deleteByUsersAndRestaurants(user, restaurant);
+    }
+
+    @Transactional
+    public void addReviewToRestaurant(Principal connectedUser, Reviews reviews) {
+        Users user = (Users) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        RestaurantStuffValidator.checkReview(reviews);
+
+        reviews.setUsers(user);
+        reviewsRepository.save(reviews);
+    }
+
+    @Transactional
+    public List<Reviews> getAllReviewsForRestaurant(Integer restaurantId) {
+        List<Reviews> foundReviews = reviewsRepository.findAll();
+
+        Restaurants foundRestaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(RestaurantNotFoundException::new);
+
+        return Optional.ofNullable(foundReviews)
+                .map(reviews -> reviews.stream()
+                        .filter(review -> review.getRestaurants().equals(foundRestaurant))
+                        .collect(Collectors.toList()))
+                        .orElseThrow(ReviewNotFoundException::new);
+
+    }
+
+    public void deleteReviewFromRestaurant(Integer reviewId) {
+        Optional<Reviews> review = reviewsRepository.findById(reviewId);
+        if (review.isPresent()) {
+            reviewsRepository.delete(review.get());
+        }
+        else{
+            throw new ReviewNotFoundException();
+        }
+    }
+
+    @Transactional
+    public void updateReview(Principal connectedUser, Reviews reviews){
+        Users user = (Users) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+
+        Reviews existingReview = reviewsRepository.findById(reviews.getId())
+                .orElseThrow(ReviewNotFoundException::new);
+
+        if (!existingReview.getUsers().getId().equals(user.getId())) {
+            throw new ReviewUnauthorizedException();
+        }
+
+        RestaurantStuffValidator.checkReview(reviews);
+        
+        if (reviews.getRate() != null) {
+            existingReview.setRate(reviews.getRate());
+        }
+        if (reviews.getComment() != null) {
+            existingReview.setComment(reviews.getComment());
+        }
+
+        reviewsRepository.save(existingReview);
+
     }
 
 }
