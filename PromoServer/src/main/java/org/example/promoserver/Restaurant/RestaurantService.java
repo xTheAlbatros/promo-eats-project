@@ -6,14 +6,17 @@ import org.example.promoserver.Models.Location;
 import org.example.promoserver.Models.Restaurants;
 import org.example.promoserver.Models.Users;
 import org.example.promoserver.Restaurant.dto.AddRestaurant;
+import org.example.promoserver.Restaurant.dto.UpdateRestaurant;
 import org.example.promoserver.Restaurant.dto.ViewRestaurant;
 import org.example.promoserver.Restaurant.exception.RestaurantNotFoundException;
 import org.example.promoserver.Restaurant.validator.RestaurantValidator;
 import org.example.promoserver.Shared.DistanceCalculator;
 import org.example.promoserver.User.UserRepository;
 import org.example.promoserver.User.exception.UserNotFoundException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,6 +35,18 @@ public class RestaurantService {
     @Transactional
     public List<ViewRestaurant> getAllRestaurant() {
         List<Restaurants> restaurants = restaurantRepository.findAll();
+        return Optional.ofNullable(restaurants)
+                .filter(list -> !list.isEmpty())
+                .map(list -> list.stream()
+                        .map(restaurantMapper::mapRestaurantsToView)
+                        .collect(Collectors.toList()))
+                .orElseThrow(RestaurantNotFoundException::new);
+    }
+
+    @Transactional
+    public List<ViewRestaurant> getAllRestaurantForOwner(Principal connectedUser) {
+        Users user = (Users) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        List<Restaurants> restaurants = restaurantRepository.findAllByUsers(user);
 
         return Optional.ofNullable(restaurants)
                 .filter(list -> !list.isEmpty())
@@ -41,11 +56,41 @@ public class RestaurantService {
                 .orElseThrow(RestaurantNotFoundException::new);
     }
 
-
-    public void saveRestaurant(AddRestaurant addRestaurant){
+    @Transactional
+    public void saveRestaurant(AddRestaurant addRestaurant, Principal connectedUser){
+        Users user = (Users) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         RestaurantValidator.validateAddRestaurant(addRestaurant);
         Restaurants restaurant = restaurantMapper.mapAddToRestaurants(addRestaurant);
+        restaurant.setUsers(user);
         restaurantRepository.save(restaurant);
+    }
+
+    @Transactional
+    public void updateRestaurant(UpdateRestaurant updateRestaurant){
+        Restaurants existingRestaurant = restaurantRepository.findById(updateRestaurant.getId())
+                .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found"));
+        RestaurantValidator.validateUpdateRestaurant(updateRestaurant);
+
+        if (updateRestaurant.getName() != null) {
+            existingRestaurant.setName(updateRestaurant.getName());
+        }
+        if (updateRestaurant.getPhone() != null) {
+            existingRestaurant.setPhone(updateRestaurant.getPhone());
+        }
+        if (updateRestaurant.getEmail() != null) {
+            existingRestaurant.setEmail(updateRestaurant.getEmail());
+        }
+        if (updateRestaurant.getWebside() != null) {
+            existingRestaurant.setWebside(updateRestaurant.getWebside());
+        }
+        if (updateRestaurant.getOpeningHours() != null) {
+            existingRestaurant.setOpeningHours(updateRestaurant.getOpeningHours());
+        }
+        if (updateRestaurant.getLocation() != null) {
+            existingRestaurant.setLocation(updateRestaurant.getLocation());
+        }
+
+        restaurantRepository.save(existingRestaurant);
     }
 
     public void deleteRestaurant(Integer id){
@@ -90,24 +135,6 @@ public class RestaurantService {
                         .collect(Collectors.toList()))
                 .orElseThrow(RestaurantNotFoundException::new);
     }
-
-    public void addOwnerToRestaurant(Integer ownerId, Integer restaurantId){
-        Optional<Restaurants> foundRestaurant = restaurantRepository.findById(restaurantId);
-        Optional<Users> foundUser = userRepository.findById(ownerId);
-
-        if(foundRestaurant.isPresent()){
-            if(foundUser.isPresent()){
-                foundRestaurant.get().setUsers(foundUser.get());
-            }
-            else{
-                throw new UserNotFoundException();
-            }
-        }
-        else{
-            throw new RestaurantNotFoundException();
-        }
-    }
-
 
 
 }
