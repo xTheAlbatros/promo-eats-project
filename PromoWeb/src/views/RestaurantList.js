@@ -14,7 +14,7 @@ function RestaurantList({
                             setConfirmationId,
                             confirmationId,
                             token,
-                            messages, // Nowy prop
+                            handleEditRestaurant, // Dodano jako props
                         }) {
     return (
         <div className="restaurant-list">
@@ -27,7 +27,8 @@ function RestaurantList({
                                     {restaurant.name}
                                 </CardTitle>
                                 <CardSubtitle className="mb-2 phone">
-                                    Telefon: <span className="text-success">{restaurant.phone}</span>
+                                    Telefon:{" "}
+                                    <span className="text-success">{restaurant.phone}</span>
                                 </CardSubtitle>
                                 <a
                                     href={restaurant.webside}
@@ -38,13 +39,23 @@ function RestaurantList({
                                     {restaurant.webside}
                                 </a>
                             </div>
-                            <Button
-                                color="danger"
-                                className="mt-3"
-                                onClick={() => setConfirmationId(restaurant.id)}
-                            >
-                                Usuń
-                            </Button>
+                            <div>
+                                <Button
+                                    color="warning"
+                                    className="mt-3"
+                                    onClick={() => handleEditRestaurant(restaurant)}
+                                    style={{ marginRight: "10px" }}
+                                >
+                                    Edytuj
+                                </Button>
+                                <Button
+                                    color="danger"
+                                    className="mt-3"
+                                    onClick={() => setConfirmationId(restaurant.id)}
+                                >
+                                    Usuń
+                                </Button>
+                            </div>
                         </div>
                         {confirmationId === restaurant.id && (
                             <div className="text-center mt-3">
@@ -77,7 +88,9 @@ function RestaurantList({
                                             <div
                                                 key={category.id}
                                                 className={`category-item ${
-                                                    selectedCategories[restaurant.id]?.includes(category.id)
+                                                    selectedCategories[restaurant.id]?.includes(
+                                                        category.id
+                                                    )
                                                         ? "selected"
                                                         : ""
                                                 }`}
@@ -98,29 +111,10 @@ function RestaurantList({
                                             Zapisz kategorie
                                         </Button>
                                     </div>
-                                    {/* Wyświetlanie komunikatu */}
-                                    {messages[restaurant.id] && (
-                                        <div
-                                            className="text-center mt-2"
-                                            style={{
-                                                color:
-                                                    messages[restaurant.id] === "Kategorie zostały zapisane."
-                                                        ? "green"
-                                                        : "red",
-                                                fontWeight: "bold",
-                                                fontSize: "16px",
-                                            }}
-                                        >
-                                            {messages[restaurant.id]}
-                                        </div>
-                                    )}
                                 </div>
                             )}
                         </div>
-                        <PromotionManager
-                            restaurantId={restaurant.id}
-                            token={token}
-                        />
+                        <PromotionManager restaurantId={restaurant.id} token={token} />
                     </CardBody>
                 </Card>
             ))}

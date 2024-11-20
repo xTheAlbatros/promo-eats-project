@@ -84,15 +84,14 @@ function PromotionManager({ restaurantId, token }) {
             const response = await fetch(
                 `http://localhost:8082/api/promotion/${promotionId}`,
                 {
-                    method: "POST",
+                    method: "DELETE",
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
 
             if (response.ok) {
-                await fetchPromotions(); // Odśwież promocje
+                await fetchPromotions();
 
-                // Jeśli po usunięciu nie ma już żadnych promocji, odśwież stronę
                 if (promotions.length === 1) {
                     window.location.reload();
                 }

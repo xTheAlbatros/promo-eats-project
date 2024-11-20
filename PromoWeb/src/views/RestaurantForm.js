@@ -9,9 +9,11 @@ function RestaurantForm({
                             handleLocationSelect,
                             handleFormSubmit,
                             formErrors,
+                            editingRestaurant, // Dodano, aby rozróżnić tryb edycji i dodawania
                         }) {
     return (
         <Form onSubmit={handleFormSubmit}>
+            <h4>{editingRestaurant ? "Edytuj restaurację" : "Dodaj restaurację"}</h4>
             <FormGroup>
                 <Label for="name">Nazwa restauracji</Label>
                 <Input
@@ -84,7 +86,7 @@ function RestaurantForm({
             </p>
             <div className="form-button-container">
                 <Button color="success" type="submit">
-                    Dodaj restaurację
+                    {editingRestaurant ? "Zapisz zmiany" : "Dodaj restaurację"}
                 </Button>
             </div>
         </Form>

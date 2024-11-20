@@ -16,7 +16,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button, Container, Row, Col } from "reactstrap";
 import IndexNavbar from "components/Navbars/IndexNavbar.js";
 import IndexHeader from "components/Headers/IndexHeader.js";
@@ -25,13 +25,13 @@ import RestaurantList from "./RestaurantList";
 import RestaurantForm from "./RestaurantForm";
 
 function Index() {
+  const formRef = useRef(null);
   const [restaurants, setRestaurants] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState({});
-  const [existingCategories, setExistingCategories] = useState({});
   const [isAddingRestaurant, setIsAddingRestaurant] = useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState({});
-  const [messages, setMessages] = useState({});
+  const [editingRestaurant, setEditingRestaurant] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -55,7 +55,14 @@ function Index() {
 
   const isLoggedIn = !!localStorage.getItem("access_token");
 
-  const fetchOwnerRestaurants = useCallback(async () => {
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchOwnerRestaurants();
+      fetchCategories();
+    }
+  }, [isLoggedIn]);
+
+  const fetchOwnerRestaurants = async () => {
     try {
       const token = localStorage.getItem("access_token");
       const response = await fetch("http://localhost:8082/api/restaurants/owner", {
@@ -65,19 +72,11 @@ function Index() {
       if (response.ok) {
         const data = await response.json();
         setRestaurants(data);
-        fetchExistingCategories(data.map((restaurant) => restaurant.id));
       }
     } catch (error) {
       console.error("Błąd połączenia z serwerem:", error);
     }
-  }, []); // Brak zależności, ponieważ `fetchExistingCategories` jest stabilne.
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchOwnerRestaurants();
-      fetchCategories();
-    }
-  }, [isLoggedIn, fetchOwnerRestaurants]);
+  };
 
   const fetchCategories = async () => {
     try {
@@ -95,42 +94,7 @@ function Index() {
     }
   };
 
-  const fetchExistingCategories = async (restaurantIds) => {
-    try {
-      const token = localStorage.getItem("access_token");
-      const promises = restaurantIds.map(async (id) => {
-        const response = await fetch(
-            `http://localhost:8082/api/restaurant/${id}/categories`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          return { [id]: data.map((category) => category.id) };
-        } else {
-          return { [id]: [] };
-        }
-      });
-
-      const results = await Promise.all(promises);
-      const categoriesMap = Object.assign({}, ...results);
-      setExistingCategories(categoriesMap);
-    } catch (error) {
-      console.error("Błąd podczas pobierania istniejących kategorii:", error);
-    }
-  };
-
   const handleCategoryChange = (restaurantId, categoryId) => {
-    if (existingCategories[restaurantId]?.includes(categoryId)) {
-      setMessages((prev) => ({
-        ...prev,
-        [restaurantId]: "Ta kategoria została już dodana.",
-      }));
-      return;
-    }
-
     setSelectedCategories((prev) => {
       const currentCategories = prev[restaurantId] || [];
       const isSelected = currentCategories.includes(categoryId);
@@ -142,11 +106,6 @@ function Index() {
             : [...currentCategories, categoryId],
       };
     });
-
-    setMessages((prev) => ({
-      ...prev,
-      [restaurantId]: "",
-    }));
   };
 
   const handleSaveCategories = async (restaurantId) => {
@@ -155,30 +114,19 @@ function Index() {
 
     try {
       for (const categoryId of categoriesToSave) {
-        if (!existingCategories[restaurantId]?.includes(categoryId)) {
-          await fetch(
-              `http://localhost:8082/api/restaurant/${restaurantId}/category/${categoryId}`,
-              {
-                method: "POST",
-                headers: { Authorization: `Bearer ${token}` },
-              }
-          );
-        }
+        await fetch(
+            `http://localhost:8082/restaurant/${restaurantId}/category/${categoryId}`,
+            {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+            }
+        );
       }
-      setMessages((prev) => ({
-        ...prev,
-        [restaurantId]: "Kategorie zostały zapisane.",
-      }));
-      fetchExistingCategories([restaurantId]); // Aktualizacja istniejących kategorii
+      alert("Kategorie zostały zapisane.");
     } catch (error) {
       console.error("Błąd podczas zapisywania kategorii:", error);
-      setMessages((prev) => ({
-        ...prev,
-        [restaurantId]: "Wystąpił błąd podczas zapisywania kategorii.",
-      }));
     }
   };
-
 
   const toggleCategoryMenu = (restaurantId) => {
     setCategoryMenuOpen((prev) => ({
@@ -191,6 +139,7 @@ function Index() {
     try {
       const token = localStorage.getItem("access_token");
 
+
       const promotionsResponse = await fetch(
           `http://localhost:8082/api/restaurant/${restaurantId}/promotions`,
           {
@@ -202,11 +151,26 @@ function Index() {
         const promotions = await promotionsResponse.json();
 
         for (const promotion of promotions) {
-          await fetch(`http://localhost:8082/api/promotion/${promotion.id}`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          const deletePromotionResponse = await fetch(
+              `http://localhost:8082/api/promotion/${promotion.id}`,
+              {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+              }
+          );
+
+          if (!deletePromotionResponse.ok) {
+            console.error(
+                `Nie udało się usunąć promocji o ID ${promotion.id}:`,
+                deletePromotionResponse.statusText
+            );
+          }
         }
+      } else {
+        console.error(
+            "Nie udało się pobrać promocji przypisanych do restauracji:",
+            promotionsResponse.statusText
+        );
       }
 
       const restaurantResponse = await fetch(
@@ -235,6 +199,7 @@ function Index() {
       alert("Nie udało się połączyć z serwerem.");
     }
   };
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -276,30 +241,32 @@ function Index() {
     if (Object.keys(errors).length > 0) return;
 
     try {
-      const restaurantResponse = await fetch(
-          "http://localhost:8082/api/restaurant",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              ...formData,
-              users: { id: 1 },
-            }),
-          }
-      );
+      // Rozróżnienie między edycją a dodawaniem
+      const method = formData.id ? "PUT" : "POST";
+      const url = "http://localhost:8082/api/restaurant";
+
+      const restaurantResponse = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData), // Wysyłamy pełne dane z ID w przypadku edycji
+      });
 
       if (!restaurantResponse.ok) {
         const errorData = await restaurantResponse.json().catch(() => ({}));
         setErrorMessage(
-            errorData.message || "Wystąpił błąd przy dodawaniu restauracji."
+            errorData.message || "Wystąpił błąd przy zapisie restauracji."
         );
         return;
       }
 
-      setSuccessMessage("Restauracja została dodana pomyślnie!");
+      setSuccessMessage(
+          formData.id
+              ? "Restauracja została zaktualizowana pomyślnie!"
+              : "Restauracja została dodana pomyślnie!"
+      );
       setTimeout(() => setSuccessMessage(""), 3000);
       setIsAddingRestaurant(false);
       setFormData({
@@ -319,12 +286,35 @@ function Index() {
         location: { latitude: "", longitude: "" },
       });
 
-      fetchOwnerRestaurants();
+      fetchOwnerRestaurants(); // Odświeżenie listy restauracji
     } catch (error) {
       console.error("Błąd połączenia z serwerem:", error);
       setErrorMessage("Nie udało się połączyć z serwerem.");
     }
   };
+
+  const handleEditRestaurant = (restaurant) => {
+    setFormData({
+      id: restaurant.id,
+      name: restaurant.name,
+      email: restaurant.email,
+      phone: restaurant.phone,
+      webside: restaurant.webside,
+      openingHours: restaurant.openingHours,
+      location: {
+        latitude: restaurant.location.latitude,
+        longitude: restaurant.location.longitude,
+      },
+    });
+    setIsAddingRestaurant(true); // Przełącza formularz na widok edycji
+
+    // Przewinięcie do formularza
+    const targetElement = document.getElementById("add-restaurant");
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
 
   return (
       <>
@@ -363,7 +353,7 @@ function Index() {
                   setConfirmationId={setConfirmationId}
                   confirmationId={confirmationId}
                   token={localStorage.getItem("access_token")}
-                  messages={messages}
+                  handleEditRestaurant={handleEditRestaurant}
               />
             </Col>
           </Row>
@@ -373,7 +363,29 @@ function Index() {
                   <Button
                       color="primary"
                       onClick={() => {
-                        setIsAddingRestaurant(!isAddingRestaurant);
+                        setIsAddingRestaurant((prev) => {
+                          if (!prev) {
+                            // Jeśli przechodzimy na tryb dodawania, resetujemy dane formularza
+                            setFormData({
+                              name: "",
+                              email: "",
+                              phone: "",
+                              webside: "",
+                              openingHours: {
+                                Monday: "",
+                                Tuesday: "",
+                                Wednesday: "",
+                                Thursday: "",
+                                Friday: "",
+                                Saturday: "",
+                                Sunday: "",
+                              },
+                              location: { latitude: "", longitude: "" },
+                            });
+                          }
+                          return !prev; // Przełączenie trybu widoczności
+                        });
+                        setEditingRestaurant(null); // Wyłączenie trybu edycji
                         setSuccessMessage("");
                       }}
                   >
@@ -381,9 +393,10 @@ function Index() {
                   </Button>
                 </Col>
               </Row>
+
           )}
           {isLoggedIn && isAddingRestaurant && (
-              <Row className="mt-3">
+              <Row className="mt-3" ref={formRef}>
                 <Col>
                   <RestaurantForm
                       formData={formData}
@@ -392,6 +405,7 @@ function Index() {
                       handleLocationSelect={handleLocationSelect}
                       handleFormSubmit={handleFormSubmit}
                       formErrors={formErrors}
+                      editingRestaurant={formData.id} // Przekazywanie trybu edycji
                   />
                 </Col>
               </Row>
