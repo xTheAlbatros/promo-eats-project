@@ -31,20 +31,22 @@ function Index() {
   const [selectedCategories, setSelectedCategories] = useState({});
   const [isAddingRestaurant, setIsAddingRestaurant] = useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState({});
-  const [editingRestaurant, setEditingRestaurant] = useState(null);
+  const [, setEditingRestaurant] = useState(null);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationType, setNotificationType] = useState(""); // 'success' or 'error'
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     webside: "",
     openingHours: {
-      Monday: "",
-      Tuesday: "",
-      Wednesday: "",
-      Thursday: "",
-      Friday: "",
-      Saturday: "",
-      Sunday: "",
+      Poniedziałek: "",
+      Wtorek: "",
+      Środa: "",
+      Czwartek: "",
+      Piątek: "",
+      Sobota: "",
+      Niedziela: "",
     },
     location: { latitude: "", longitude: "" },
   });
@@ -76,6 +78,15 @@ function Index() {
     } catch (error) {
       console.error("Błąd połączenia z serwerem:", error);
     }
+  };
+
+  const showNotification = (message, type) => {
+    setNotificationMessage(message);
+    setNotificationType(type);
+    setTimeout(() => {
+      setNotificationMessage("");
+      setNotificationType("");
+    }, 3000);
   };
 
   const fetchCategories = async () => {
@@ -113,20 +124,45 @@ function Index() {
     const categoriesToSave = selectedCategories[restaurantId] || [];
 
     try {
-      for (const categoryId of categoriesToSave) {
+      const existingCategoriesResponse = await fetch(
+          `http://localhost:8082/api/restaurant/${restaurantId}/categories`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+      );
+
+      if (!existingCategoriesResponse.ok) {
+        showNotification("Błąd podczas pobierania istniejących kategorii.", "error");
+        return;
+      }
+
+      const existingCategories = await existingCategoriesResponse.json();
+      const categoriesNotSaved = categoriesToSave.filter(
+          (categoryId) => !existingCategories.some((cat) => cat.id === categoryId)
+      );
+
+      if (categoriesNotSaved.length === 0) {
+        showNotification("Wybrane kategorie są już przypisane.", "error");
+        return;
+      }
+
+      for (const categoryId of categoriesNotSaved) {
         await fetch(
-            `http://localhost:8082/restaurant/${restaurantId}/category/${categoryId}`,
+            `http://localhost:8082/api/restaurant/${restaurantId}/category/${categoryId}`,
             {
               method: "POST",
               headers: { Authorization: `Bearer ${token}` },
             }
         );
       }
-      alert("Kategorie zostały zapisane.");
+
+      showNotification("Kategorie zostały zapisane.", "success");
     } catch (error) {
-      console.error("Błąd podczas zapisywania kategorii:", error);
+      showNotification("Błąd podczas zapisywania kategorii.", "error");
     }
   };
+
+
 
   const toggleCategoryMenu = (restaurantId) => {
     setCategoryMenuOpen((prev) => ({
@@ -275,13 +311,13 @@ function Index() {
         phone: "",
         webside: "",
         openingHours: {
-          Monday: "",
-          Tuesday: "",
-          Wednesday: "",
-          Thursday: "",
-          Friday: "",
-          Saturday: "",
-          Sunday: "",
+          Poniedziałek: "",
+          Wtorek: "",
+          Środa: "",
+          Czwartek: "",
+          Piątek: "",
+          Sobota: "",
+          Niedziela: "",
         },
         location: { latitude: "", longitude: "" },
       });
@@ -354,7 +390,10 @@ function Index() {
                   confirmationId={confirmationId}
                   token={localStorage.getItem("access_token")}
                   handleEditRestaurant={handleEditRestaurant}
+                  notificationMessage={notificationMessage} // Dodano
+                  notificationType={notificationType}       // Dodano
               />
+
             </Col>
           </Row>
           {isLoggedIn && (
@@ -372,13 +411,13 @@ function Index() {
                               phone: "",
                               webside: "",
                               openingHours: {
-                                Monday: "",
-                                Tuesday: "",
-                                Wednesday: "",
-                                Thursday: "",
-                                Friday: "",
-                                Saturday: "",
-                                Sunday: "",
+                                Poniedziałek: "",
+                                Wtorek: "",
+                                Środa: "",
+                                Czwartek: "",
+                                Piątek: "",
+                                Sobota: "",
+                                Niedziela: "",
                               },
                               location: { latitude: "", longitude: "" },
                             });
@@ -405,7 +444,7 @@ function Index() {
                       handleLocationSelect={handleLocationSelect}
                       handleFormSubmit={handleFormSubmit}
                       formErrors={formErrors}
-                      editingRestaurant={formData.id} // Przekazywanie trybu edycji
+                      editingRestaurant={formData.id}
                   />
                 </Col>
               </Row>

@@ -14,8 +14,11 @@ function RestaurantList({
                             setConfirmationId,
                             confirmationId,
                             token,
-                            handleEditRestaurant, // Dodano jako props
+                            handleEditRestaurant,
+                            notificationMessage, // Dodano
+                            notificationType,    // Dodano
                         }) {
+
     return (
         <div className="restaurant-list">
             {restaurants.map((restaurant) => (
@@ -102,6 +105,12 @@ function RestaurantList({
                                             </div>
                                         ))}
                                     </div>
+                                    {notificationMessage && (
+                                        <div className={`notification-${notificationType}`}>
+                                            {notificationMessage}
+                                        </div>
+                                    )}
+
                                     <div className="form-button-container">
                                         <Button
                                             color="success"
