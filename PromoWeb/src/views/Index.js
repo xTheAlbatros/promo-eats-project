@@ -16,7 +16,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button, Container, Row, Col } from "reactstrap";
 import IndexNavbar from "components/Navbars/IndexNavbar.js";
 import IndexHeader from "components/Headers/IndexHeader.js";
@@ -28,8 +28,10 @@ function Index() {
   const [restaurants, setRestaurants] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState({});
+  const [existingCategories, setExistingCategories] = useState({});
   const [isAddingRestaurant, setIsAddingRestaurant] = useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState({});
+  const [messages, setMessages] = useState({});
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -53,14 +55,7 @@ function Index() {
 
   const isLoggedIn = !!localStorage.getItem("access_token");
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchOwnerRestaurants();
-      fetchCategories();
-    }
-  }, [isLoggedIn]);
-
-  const fetchOwnerRestaurants = async () => {
+  const fetchOwnerRestaurants = useCallback(async () => {
     try {
       const token = localStorage.getItem("access_token");
       const response = await fetch("http://localhost:8082/api/restaurants/owner", {
@@ -70,11 +65,19 @@ function Index() {
       if (response.ok) {
         const data = await response.json();
         setRestaurants(data);
+        fetchExistingCategories(data.map((restaurant) => restaurant.id));
       }
     } catch (error) {
       console.error("Błąd połączenia z serwerem:", error);
     }
-  };
+  }, []); // Brak zależności, ponieważ `fetchExistingCategories` jest stabilne.
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchOwnerRestaurants();
+      fetchCategories();
+    }
+  }, [isLoggedIn, fetchOwnerRestaurants]);
 
   const fetchCategories = async () => {
     try {
@@ -92,7 +95,42 @@ function Index() {
     }
   };
 
+  const fetchExistingCategories = async (restaurantIds) => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const promises = restaurantIds.map(async (id) => {
+        const response = await fetch(
+            `http://localhost:8082/api/restaurant/${id}/categories`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          return { [id]: data.map((category) => category.id) };
+        } else {
+          return { [id]: [] };
+        }
+      });
+
+      const results = await Promise.all(promises);
+      const categoriesMap = Object.assign({}, ...results);
+      setExistingCategories(categoriesMap);
+    } catch (error) {
+      console.error("Błąd podczas pobierania istniejących kategorii:", error);
+    }
+  };
+
   const handleCategoryChange = (restaurantId, categoryId) => {
+    if (existingCategories[restaurantId]?.includes(categoryId)) {
+      setMessages((prev) => ({
+        ...prev,
+        [restaurantId]: "Ta kategoria została już dodana.",
+      }));
+      return;
+    }
+
     setSelectedCategories((prev) => {
       const currentCategories = prev[restaurantId] || [];
       const isSelected = currentCategories.includes(categoryId);
@@ -104,6 +142,11 @@ function Index() {
             : [...currentCategories, categoryId],
       };
     });
+
+    setMessages((prev) => ({
+      ...prev,
+      [restaurantId]: "",
+    }));
   };
 
   const handleSaveCategories = async (restaurantId) => {
@@ -112,19 +155,30 @@ function Index() {
 
     try {
       for (const categoryId of categoriesToSave) {
-        await fetch(
-            `http://localhost:8082/restaurant/${restaurantId}/category/${categoryId}`,
-            {
-              method: "POST",
-              headers: { Authorization: `Bearer ${token}` },
-            }
-        );
+        if (!existingCategories[restaurantId]?.includes(categoryId)) {
+          await fetch(
+              `http://localhost:8082/api/restaurant/${restaurantId}/category/${categoryId}`,
+              {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+              }
+          );
+        }
       }
-      alert("Kategorie zostały zapisane.");
+      setMessages((prev) => ({
+        ...prev,
+        [restaurantId]: "Kategorie zostały zapisane.",
+      }));
+      fetchExistingCategories([restaurantId]); // Aktualizacja istniejących kategorii
     } catch (error) {
       console.error("Błąd podczas zapisywania kategorii:", error);
+      setMessages((prev) => ({
+        ...prev,
+        [restaurantId]: "Wystąpił błąd podczas zapisywania kategorii.",
+      }));
     }
   };
+
 
   const toggleCategoryMenu = (restaurantId) => {
     setCategoryMenuOpen((prev) => ({
@@ -309,6 +363,7 @@ function Index() {
                   setConfirmationId={setConfirmationId}
                   confirmationId={confirmationId}
                   token={localStorage.getItem("access_token")}
+                  messages={messages}
               />
             </Col>
           </Row>

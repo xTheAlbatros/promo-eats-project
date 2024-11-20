@@ -14,6 +14,7 @@ function RestaurantList({
                             setConfirmationId,
                             confirmationId,
                             token,
+                            messages, // Nowy prop
                         }) {
     return (
         <div className="restaurant-list">
@@ -97,6 +98,22 @@ function RestaurantList({
                                             Zapisz kategorie
                                         </Button>
                                     </div>
+                                    {/* Wyświetlanie komunikatu */}
+                                    {messages[restaurant.id] && (
+                                        <div
+                                            className="text-center mt-2"
+                                            style={{
+                                                color:
+                                                    messages[restaurant.id] === "Kategorie zostały zapisane."
+                                                        ? "green"
+                                                        : "red",
+                                                fontWeight: "bold",
+                                                fontSize: "16px",
+                                            }}
+                                        >
+                                            {messages[restaurant.id]}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
