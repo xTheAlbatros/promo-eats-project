@@ -93,6 +93,7 @@ public class RestaurantService {
         restaurantRepository.save(existingRestaurant);
     }
 
+    @Transactional
     public void deleteRestaurant(Integer id){
         Optional<Restaurants> foundRestaurant = restaurantRepository.findById(id);
         if(foundRestaurant.isPresent()){

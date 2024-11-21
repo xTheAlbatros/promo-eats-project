@@ -44,6 +44,14 @@ public class RestaurantStuffService {
         categoryRepository.delete(category);
     }
 
+    @Transactional
+    public void deleteConnectionCategoryToRestaurant(Integer id) {
+        Categories category = categoryRepository.findById(id)
+                .orElseThrow(CategoryNotFoundException::new);
+
+        restaurantsCategoriesRepository.deleteByCategories(category);
+    }
+
     public List<Categories> getAllCategories() {
         return categoryRepository.findAll();
     }
