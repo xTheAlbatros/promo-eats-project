@@ -31,9 +31,9 @@ public class RestaurantStuffController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/category/{id}/connection")
-    public ResponseEntity<Void> deleteCategoryConnection(@PathVariable Integer id) {
-        restaurantStuffService.deleteConnectionCategoryToRestaurant(id);
+    @DeleteMapping("/restaurant/{restaurant_id}/category/{category_id}")
+    public ResponseEntity<Void> deleteCategoryConnectionToRestaurant(@PathVariable Integer restaurant_id, @PathVariable Integer category_id) {
+        restaurantStuffService.deleteConnectionCategoryToRestaurant(restaurant_id, category_id);
         return ResponseEntity.ok().build();
     }
 

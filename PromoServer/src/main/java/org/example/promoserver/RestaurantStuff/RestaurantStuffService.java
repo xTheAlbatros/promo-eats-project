@@ -45,11 +45,14 @@ public class RestaurantStuffService {
     }
 
     @Transactional
-    public void deleteConnectionCategoryToRestaurant(Integer id) {
-        Categories category = categoryRepository.findById(id)
+    public void deleteConnectionCategoryToRestaurant(Integer restaurant_id, Integer category_id) {
+        Restaurants restaurant = restaurantRepository.findById(restaurant_id)
+                .orElseThrow(RestaurantNotFoundException::new);
+
+        Categories category = categoryRepository.findById(category_id)
                 .orElseThrow(CategoryNotFoundException::new);
 
-        restaurantsCategoriesRepository.deleteByCategories(category);
+        restaurantsCategoriesRepository.deleteByRestaurantsAndCategories(restaurant, category);
     }
 
     public List<Categories> getAllCategories() {

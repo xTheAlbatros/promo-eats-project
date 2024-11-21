@@ -11,6 +11,6 @@ public interface RestaurantsCategoriesRepository extends JpaRepository<Restauran
 
     List<RestaurantsCategories> findAllByRestaurants(Restaurants restaurant);
 
-    void deleteByCategories(Categories categories);
+    void deleteByRestaurantsAndCategories(Restaurants restaurant, Categories categories);
 }
 
