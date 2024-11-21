@@ -19,6 +19,8 @@ function PromotionManager({ restaurantId, token }) {
         endTime: "",
     });
 
+    const [editingPromotion, setEditingPromotion] = useState(null);
+
     const fetchPromotions = useCallback(async () => {
         try {
             const response = await fetch(
@@ -61,7 +63,7 @@ function PromotionManager({ restaurantId, token }) {
                     description: promotionData.description,
                     startTime: promotionData.startTime,
                     endTime: promotionData.endTime,
-                    restaurant: { id: restaurantId }, // kluczowy element
+                    restaurant: { id: restaurantId },
                 }),
             });
 
@@ -77,7 +79,6 @@ function PromotionManager({ restaurantId, token }) {
             console.error("Błąd połączenia z serwerem:", error);
         }
     };
-
 
     const handleDeletePromotion = async (promotionId) => {
         try {
@@ -103,6 +104,44 @@ function PromotionManager({ restaurantId, token }) {
         }
     };
 
+    const handleEditPromotion = (promotion) => {
+        setEditingPromotion(promotion);
+        setPromotionData({
+            description: promotion.description,
+            startTime: promotion.startTime,
+            endTime: promotion.endTime,
+        });
+    };
+
+    const handleUpdatePromotion = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch("http://localhost:8082/api/promotion", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    id: editingPromotion.id,
+                    description: promotionData.description,
+                    startTime: promotionData.startTime,
+                    endTime: promotionData.endTime,
+                }),
+            });
+
+            if (response.ok) {
+                setEditingPromotion(null);
+                setPromotionData({ description: "", startTime: "", endTime: "" });
+                fetchPromotions();
+            } else {
+                const errorData = await response.json();
+                console.error("Błąd przy edytowaniu promocji:", errorData);
+            }
+        } catch (error) {
+            console.error("Błąd połączenia z serwerem:", error);
+        }
+    };
 
     return (
         <div>
@@ -112,19 +151,76 @@ function PromotionManager({ restaurantId, token }) {
                     <CardBody>
                         <h5>{promotion.description}</h5>
                         <CardSubtitle>
-                            Od: {new Date(promotion.startTime).toLocaleString()} <br/>
+                            Od: {new Date(promotion.startTime).toLocaleString()} <br />
                             Do: {new Date(promotion.endTime).toLocaleString()}
                         </CardSubtitle>
-                        <Button
-                            color="danger"
-                            className="mt-2"
-                            onClick={() => handleDeletePromotion(promotion.id)}
-                        >
-                            Usuń
-                        </Button>
+                        <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                            <Button
+                                color="warning"
+                                onClick={() => handleEditPromotion(promotion)}
+                            >
+                                Edytuj
+                            </Button>
+                            <Button
+                                color="danger"
+                                onClick={() => handleDeletePromotion(promotion.id)}
+                            >
+                                Usuń
+                            </Button>
+                        </div>
                     </CardBody>
                 </Card>
             ))}
+
+            {editingPromotion && (
+                <Form onSubmit={handleUpdatePromotion} className="mt-3">
+                    <FormGroup>
+                        <Label for="description">Opis Promocji</Label>
+                        <Input
+                            type="text"
+                            name="description"
+                            id="description"
+                            value={promotionData.description}
+                            onChange={handleInputChange}
+                            required
+                        />
+                    </FormGroup>
+                    <FormGroup>
+                        <Label for="startTime">Czas rozpoczęcia</Label>
+                        <Input
+                            type="datetime-local"
+                            name="startTime"
+                            id="startTime"
+                            value={promotionData.startTime}
+                            onChange={handleInputChange}
+                            required
+                        />
+                    </FormGroup>
+                    <FormGroup>
+                        <Label for="endTime">Czas zakończenia</Label>
+                        <Input
+                            type="datetime-local"
+                            name="endTime"
+                            id="endTime"
+                            value={promotionData.endTime}
+                            onChange={handleInputChange}
+                            required
+                        />
+                    </FormGroup>
+                    <div style={{display: "flex", gap: "10px", justifyContent: "center"}}>
+                        <Button color="success" type="submit">
+                            Zapisz Zmiany
+                        </Button>
+                        <Button
+                            color="danger"
+                            type="button"
+                            onClick={() => setEditingPromotion(null)}
+                        >
+                            Anuluj
+                        </Button>
+                    </div>
+                </Form>
+            )}
 
             <Button
                 color="info"
@@ -169,13 +265,14 @@ function PromotionManager({ restaurantId, token }) {
                             required
                         />
                     </FormGroup>
-                    <Button color="success" type="submit">
-                        Zapisz Promocję
-                    </Button>
+                    <div style={{textAlign: "center"}}>
+                        <Button color="success" type="submit">
+                            Zapisz Promocję
+                        </Button>
+                    </div>
                 </Form>
             )}
         </div>
-
     );
 }
 
