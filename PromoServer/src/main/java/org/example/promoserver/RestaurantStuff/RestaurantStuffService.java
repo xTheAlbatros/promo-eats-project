@@ -37,6 +37,7 @@ public class RestaurantStuffService {
         categoryRepository.save(category);
     }
 
+    @Transactional
     public void deleteCategory(Integer id) {
         Categories category = categoryRepository.findById(id)
                 .orElseThrow(CategoryNotFoundException::new);
