@@ -719,19 +719,22 @@
 }
 
 .category-item {
-  display: inline-block;
-  padding: 10px;
-  margin: 5px;
+  padding: 5px 10px;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  margin: 5px;
+  display: inline-block;
+  border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  background-color: transparent;
+  color: white !important; /* Używamy !important, aby wymusić biały kolor tekstu */
 }
 
 .category-item.selected {
-  background-color: #007bff;
-  color: white;
-  border-color: #0056b3;
+  background-color: green;
+  color: white !important; /* Zachowujemy biały kolor tekstu dla podświetlonych kategorii */
 }
+
 
 .promotion-card {
   background-color: #333; /* Ciemne tło dla kontrastu */

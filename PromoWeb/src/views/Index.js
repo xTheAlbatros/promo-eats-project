@@ -33,7 +33,7 @@ function Index() {
   const [categoryMenuOpen, setCategoryMenuOpen] = useState({});
   const [, setEditingRestaurant] = useState(null);
   const [notificationMessage, setNotificationMessage] = useState("");
-  const [notificationType, setNotificationType] = useState(""); // 'success' or 'error'
+  const [notificationType, setNotificationType] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -277,7 +277,6 @@ function Index() {
     if (Object.keys(errors).length > 0) return;
 
     try {
-      // Rozróżnienie między edycją a dodawaniem
       const method = formData.id ? "PUT" : "POST";
       const url = "http://localhost:8082/api/restaurant";
 
@@ -287,7 +286,7 @@ function Index() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData), // Wysyłamy pełne dane z ID w przypadku edycji
+        body: JSON.stringify(formData),
       });
 
       if (!restaurantResponse.ok) {
@@ -322,7 +321,7 @@ function Index() {
         location: { latitude: "", longitude: "" },
       });
 
-      fetchOwnerRestaurants(); // Odświeżenie listy restauracji
+      fetchOwnerRestaurants();
     } catch (error) {
       console.error("Błąd połączenia z serwerem:", error);
       setErrorMessage("Nie udało się połączyć z serwerem.");
@@ -342,7 +341,7 @@ function Index() {
         longitude: restaurant.location.longitude,
       },
     });
-    setIsAddingRestaurant(true); // Przełącza formularz na widok edycji
+    setIsAddingRestaurant(true);
 
     // Przewinięcie do formularza
     const targetElement = document.getElementById("add-restaurant");
@@ -390,9 +389,11 @@ function Index() {
                   confirmationId={confirmationId}
                   token={localStorage.getItem("access_token")}
                   handleEditRestaurant={handleEditRestaurant}
-                  notificationMessage={notificationMessage} // Dodano
-                  notificationType={notificationType}       // Dodano
+                  notificationMessage={notificationMessage}
+                  notificationType={notificationType}
+                  showNotification={showNotification}
               />
+
 
             </Col>
           </Row>
@@ -404,7 +405,6 @@ function Index() {
                       onClick={() => {
                         setIsAddingRestaurant((prev) => {
                           if (!prev) {
-                            // Jeśli przechodzimy na tryb dodawania, resetujemy dane formularza
                             setFormData({
                               name: "",
                               email: "",
@@ -422,9 +422,9 @@ function Index() {
                               location: { latitude: "", longitude: "" },
                             });
                           }
-                          return !prev; // Przełączenie trybu widoczności
+                          return !prev;
                         });
-                        setEditingRestaurant(null); // Wyłączenie trybu edycji
+                        setEditingRestaurant(null);
                         setSuccessMessage("");
                       }}
                   >

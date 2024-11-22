@@ -9,7 +9,7 @@ function RestaurantForm({
                             handleLocationSelect,
                             handleFormSubmit,
                             formErrors,
-                            editingRestaurant, // Dodano, aby rozróżnić tryb edycji i dodawania
+                            editingRestaurant,
                         }) {
     return (
         <Form onSubmit={handleFormSubmit}>
