@@ -55,11 +55,11 @@ public class PromotionService {
         promotionRepository.save(existingPromotion);
     }
 
-    public void saveImage(Images images){
-        if(promotionRepository.existsById(images.getPromotion().getId())){
+    public void saveImage(Images images) {
+        if (images.getPromotion() != null && promotionRepository.existsById(images.getPromotion().getId())) {
             imagesRepository.save(images);
-        }else{
-            throw new RestaurantNotFoundException();
+        } else {
+            throw new PromotionNotFoundException();
         }
     }
 
@@ -78,6 +78,10 @@ public class PromotionService {
         Optional<Promotions> foundPromotion = Optional.ofNullable(promotionRepository.findById(promotionId)
                 .orElseThrow(PromotionNotFoundException::new));
         foundPromotion.ifPresent(promotionRepository::delete);
+    }
+
+    public List<Images> getImagesForPromotion(Integer promotionId) {
+        return imagesRepository.findByPromotion_Id(promotionId);
     }
 
     @Transactional

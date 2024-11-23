@@ -51,4 +51,10 @@ public class PromotionController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/promotion/{id}/images")
+    public List<Images> getImagesForPromotion(@PathVariable Integer id) {
+        return promotionService.getImagesForPromotion(id); // Dodaj tę metodę w serwisie
+    }
+
+
 }
