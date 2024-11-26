@@ -244,7 +244,7 @@ function PromotionManager({ restaurantId, token }) {
 
     return (
         <div>
-            <h5 className="text-warning">Promocje</h5>
+            <h1 className="text-primary text-center">Promocje:</h1>
             {promotions.map((promotion) => (
                 <Card key={promotion.id} className="promotion-card">
                     <CardBody>
@@ -302,7 +302,7 @@ function PromotionManager({ restaurantId, token }) {
                         >
                             <FormGroup>
                                 <Label for={`imageFile-${promotion.id}`}>
-                                    Dodaj obraz do promocji
+                                    Dodaj obraz do promocji:
                                 </Label>
                                 <Input
                                     type="file"
@@ -369,7 +369,14 @@ function PromotionManager({ restaurantId, token }) {
                                 required
                             />
                         </FormGroup>
-                        <div style={{ textAlign: "center" }}>
+
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "10px",
+                            marginTop: "10px"
+                        }}>
                             <Button color="success" type="submit">
                                 {editingPromotion ? "Zapisz Zmiany" : "Dodaj Promocję"}
                             </Button>
@@ -377,6 +384,7 @@ function PromotionManager({ restaurantId, token }) {
                                 Anuluj
                             </Button>
                         </div>
+
                     </Form>
                 )}
 

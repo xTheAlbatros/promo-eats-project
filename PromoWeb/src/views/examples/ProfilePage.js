@@ -43,10 +43,9 @@ function ProfilePage() {
     confirmationPassword: "",
   });
   const [passwordErrors, setPasswordErrors] = useState({});
-  const [successMessage, setSuccessMessage] = useState(""); // Dodano komunikat sukcesu
+  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
-  // Fetch user data from backend
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem("access_token");
@@ -168,16 +167,35 @@ function ProfilePage() {
             </div>
             <Row>
               <Col className="ml-auto mr-auto text-center" md="6">
-                <Button
-                    className="btn-round"
-                    color="info"
-                    onClick={() => {
-                      setSuccessMessage("");
-                      setChangePasswordVisible(!changePasswordVisible);
-                    }}
-                >
-                  Zmień hasło
-                </Button>
+                <div style={{ marginBottom: "20px" }}>
+                  <Button
+                      className="btn-round"
+                      color="primary"
+                      onClick={() => {
+                        navigate("/");
+                        setTimeout(() => {
+                          const targetElement = document.getElementById("add-restaurant");
+                          if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: "smooth" });
+                          }
+                        }, 100);
+                      }}
+                  >
+                    Twoje restauracje
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                      className="btn-round"
+                      color="info"
+                      onClick={() => {
+                        setSuccessMessage("");
+                        setChangePasswordVisible(!changePasswordVisible);
+                      }}
+                  >
+                    Zmień hasło
+                  </Button>
+                </div>
                 {changePasswordVisible && (
                     <Form onSubmit={handlePasswordChange} className="mt-3">
                       <FormGroup>

@@ -68,7 +68,6 @@ function RestaurantList({
                     showNotification("Nie udało się usunąć kategorii.", "error");
                 }
             } else {
-                // Dodaj kategorię do bazy danych
                 const response = await fetch(
                     `http://localhost:8082/api/restaurant/${restaurantId}/category/${categoryId}`,
                     {
@@ -99,21 +98,17 @@ function RestaurantList({
                     <CardBody className="d-flex flex-column">
                         <div className="d-flex justify-content-between align-items-center">
                             <div>
-                                <CardTitle tag="h5" className="text-warning">
+                                <CardTitle tag="h5" className="text-warning mb-3">
                                     {restaurant.name}
                                 </CardTitle>
-                                <CardSubtitle className="mb-2 phone">
-                                    Telefon:{" "}
-                                    <span className="text-success">{restaurant.phone}</span>
+                                <CardSubtitle className="mb-3">
+                                    <span className="font-weight-bold">Telefon:</span>{" "}
+                                    <span className="text-success font-weight-bold">{restaurant.phone}</span>
                                 </CardSubtitle>
-                                <a
-                                    href={restaurant.webside}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-success"
-                                >
-                                    {restaurant.webside}
-                                </a>
+                                <div className="mb-3">
+                                    <span className="font-weight-bold">Strona:</span>{" "}
+                                    <span className="text-success font-weight-bold">{restaurant.webside}</span>
+                                </div>
                             </div>
                             <div>
                                 <Button
