@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardBody, CardTitle, CardSubtitle, Button } from "reactstrap";
 import PromotionManager from "./PromotionManager";
-
+import "./RestaurantList.css"
 function RestaurantList({
                             restaurants,
                             categories,
@@ -46,6 +46,17 @@ function RestaurantList({
             fetchPersistedCategories();
         }
     }, [restaurants, token]);
+
+
+    const [promotionVisibility, setPromotionVisibility] = useState({});
+
+    const togglePromotionsVisibility = (restaurantId) => {
+        setPromotionVisibility((prev) => ({
+            ...prev,
+            [restaurantId]: !prev[restaurantId], // Przełącz widoczność
+        }));
+    };
+
 
     const handleCategoryClick = async (restaurantId, categoryId, isPersisted) => {
         try {
@@ -93,109 +104,133 @@ function RestaurantList({
 
     return (
         <div className="restaurant-list">
+            <h1 className="restaurant-header">Twoje restauracje:</h1>
             {restaurants.map((restaurant) => (
-                <Card key={restaurant.id} className="mb-3 shadow-sm">
-                    <CardBody className="d-flex flex-column">
-                        <div className="d-flex justify-content-between align-items-center">
-                            <div>
-                                <CardTitle tag="h5" className="text-warning mb-3">
+                <Card key={restaurant.id} className="restaurant-card">
+                    <CardBody>
+                        <div className="d-flex justify-content-between align-items-start">
+                            <div className="restaurant-data">
+                                <CardTitle tag="h4" className="card-title">
                                     {restaurant.name}
                                 </CardTitle>
-                                <CardSubtitle className="mb-3">
-                                    <span className="font-weight-bold">Telefon:</span>{" "}
-                                    <span className="text-success font-weight-bold">{restaurant.phone}</span>
+                                <CardSubtitle className="card-subtitle">
+                                    <strong>Telefon:</strong> {restaurant.phone}
                                 </CardSubtitle>
-                                <div className="mb-3">
-                                    <span className="font-weight-bold">Strona:</span>{" "}
-                                    <span className="text-success font-weight-bold">{restaurant.webside}</span>
+                                <p className="card-subtitle">
+                                    <strong>Strona:</strong> {restaurant.webside || "Brak danych"}
+                                </p>
+
+                                <h2 className="categories-header">Kategorie Twojej restauracji:</h2>
+                                <div className="added-categories">
+                                    {persistedCategories[restaurant.id]?.map((categoryId) => {
+                                        const category = categories.find((cat) => cat.id === categoryId);
+                                        return (
+                                            <div key={categoryId} className="category-rectangle">
+                                                {category?.name || "Nieznana kategoria"}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
-                            <div>
+
+                            <div className="button-container">
                                 <Button
-                                    color="warning"
-                                    className="mt-3"
+                                    color="info"
                                     onClick={() => handleEditRestaurant(restaurant)}
-                                    style={{ marginRight: "10px" }}
                                 >
                                     Edytuj
                                 </Button>
                                 <Button
                                     color="danger"
-                                    className="mt-3"
                                     onClick={() => setConfirmationId(restaurant.id)}
                                 >
                                     Usuń
                                 </Button>
                             </div>
                         </div>
+
                         {confirmationId === restaurant.id && (
-                            <div className="text-center mt-3">
+                            <div className="confirmation-container">
                                 <p>Czy na pewno chcesz usunąć tę restaurację?</p>
-                                <Button
-                                    color="success"
-                                    onClick={() => confirmDeleteRestaurant(restaurant.id)}
-                                    style={{ marginRight: "10px" }}
-                                >
-                                    Tak
-                                </Button>
-                                <Button color="danger" onClick={() => setConfirmationId(null)}>
-                                    Nie
-                                </Button>
+                                <div className="confirm-btn-container">
+                                    <Button
+                                        className="confirm-btn confirm-btn-yes"
+                                        onClick={() => confirmDeleteRestaurant(restaurant.id)}
+                                    >
+                                        TAK
+                                    </Button>
+                                    <Button
+                                        className="confirm-btn confirm-btn-no"
+                                        onClick={() => setConfirmationId(null)}
+                                    >
+                                        NIE
+                                    </Button>
+                                </div>
                             </div>
                         )}
-                        <div className="mt-3">
-                            <Button
-                                color="info"
-                                className="mt-2"
-                                onClick={() => toggleCategoryMenu(restaurant.id)}
-                            >
-                                Wybierz kategorie dla restauracji
-                            </Button>
-                            {categoryMenuOpen[restaurant.id] && (
-                                <div className="mt-2">
-                                    <h6 className="text-muted">Kategorie:</h6>
-                                    <div className="categories-container">
-                                        {categories.map((category) => {
-                                            const isPersisted =
-                                                persistedCategories[restaurant.id]?.includes(
-                                                    category.id
-                                                );
 
-                                            return (
-                                                <div
-                                                    key={category.id}
-                                                    className={`category-item ${
-                                                        isPersisted ? "selected" : ""
-                                                    }`}
-                                                    style={{
-                                                        backgroundColor: isPersisted
-                                                            ? "green"
-                                                            : "transparent",
-                                                        color: isPersisted ? "white" : "black",
-                                                        cursor: "pointer",
-                                                    }}
-                                                    onClick={() =>
-                                                        handleCategoryClick(
-                                                            restaurant.id,
-                                                            category.id,
-                                                            isPersisted
-                                                        )
-                                                    }
-                                                >
-                                                    {category.name}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                    {notificationMessage && (
-                                        <div className={`notification-${notificationType}`}>
-                                            {notificationMessage}
-                                        </div>
-                                    )}
+                        <div className="category-section">
+                            <div className="d-flex justify-content-center mt-3">
+                                <Button
+                                    className="category-button"
+                                    onClick={() => toggleCategoryMenu(restaurant.id)}
+                                >
+                                    Zarządzaj kategoriami
+                                </Button>
+                            </div>
+                            {categoryMenuOpen[restaurant.id] && (
+                                <div className="categories-list mt-3">
+                                    {categories.map((category) => (
+                                        <span
+                                            key={category.id}
+                                            className={`category-badge ${
+                                                persistedCategories[restaurant.id]?.includes(category.id)
+                                                    ? "category-selected"
+                                                    : ""
+                                            }`}
+                                            onClick={() =>
+                                                handleCategoryClick(
+                                                    restaurant.id,
+                                                    category.id,
+                                                    persistedCategories[restaurant.id]?.includes(category.id)
+                                                )
+                                            }
+                                        >
+              {category.name}
+            </span>
+                                    ))}
                                 </div>
                             )}
                         </div>
-                        <PromotionManager restaurantId={restaurant.id} token={token} />
+
+                        {/* Przycisk do wyświetlania/ukrywania promocji */}
+                        <div className="d-flex justify-content-center mt-3">
+                            <Button
+                                color="primary"
+                                className="toggle-promotions-button"
+                                onClick={() => togglePromotionsVisibility(restaurant.id)}
+                            >
+                                {promotionVisibility[restaurant.id] ? (
+                                    <>
+                                        <i className="nc-icon nc-minimal-up"></i> Ukryj promocje
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="nc-icon nc-minimal-down"></i> Wyświetl promocje
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+
+                        {/* Sekcja promocji - widoczna tylko gdy aktywna */}
+                        {promotionVisibility[restaurant.id] && (
+                            <div className="promotion-section">
+                                <PromotionManager
+                                    restaurantId={restaurant.id}
+                                    token={token}
+                                />
+                            </div>
+                        )}
                     </CardBody>
                 </Card>
             ))}

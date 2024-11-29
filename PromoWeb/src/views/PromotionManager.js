@@ -9,6 +9,7 @@ import {
     CardBody,
     CardSubtitle,
 } from "reactstrap";
+import "./PromotionManager.css"; // Plik CSS do poprawy wizualnej
 
 function PromotionManager({ restaurantId, token }) {
     const [promotions, setPromotions] = useState([]);
@@ -21,7 +22,7 @@ function PromotionManager({ restaurantId, token }) {
     const [editingPromotion, setEditingPromotion] = useState(null);
     const [promotionImages, setPromotionImages] = useState({});
     const [imageFile, setImageFile] = useState(null);
-    const formContainerRef = useRef(null); // Referencja do kontenera formularza
+    const formContainerRef = useRef(null);
 
     const fetchPromotions = useCallback(async () => {
         try {
@@ -36,7 +37,6 @@ function PromotionManager({ restaurantId, token }) {
                 const data = await response.json();
                 setPromotions(data);
 
-                // Fetch images for each promotion
                 for (const promotion of data) {
                     fetchPromotionImages(promotion.id);
                 }
@@ -93,8 +93,7 @@ function PromotionManager({ restaurantId, token }) {
                 method,
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+                    Authorization: `Bearer ${token}` },
                 body: JSON.stringify({
                     id: editingPromotion?.id,
                     description: promotionData.description,
@@ -147,7 +146,6 @@ function PromotionManager({ restaurantId, token }) {
         });
         setIsAddingOrEditing(true);
 
-        // Przewiń do formularza
         if (formContainerRef.current) {
             formContainerRef.current.scrollIntoView({ behavior: "smooth" });
         }
@@ -171,7 +169,6 @@ function PromotionManager({ restaurantId, token }) {
 
         let imageUrl = null;
 
-        // Prześlij obraz do Cloudinary
         const formData = new FormData();
         formData.append("file", imageFile);
         formData.append("upload_preset", "default_preset");
@@ -197,7 +194,6 @@ function PromotionManager({ restaurantId, token }) {
             return;
         }
 
-        // Zapisz obraz w bazie danych
         try {
             const imageBody = {
                 name: imageFile.name,
@@ -216,7 +212,7 @@ function PromotionManager({ restaurantId, token }) {
 
             if (imageResponse.ok) {
                 setImageFile(null);
-                fetchPromotionImages(promotionId); // Aktualizuj obrazy dla promocji
+                fetchPromotionImages(promotionId);
             } else {
                 console.error("Failed to save image in the database");
             }
@@ -233,7 +229,7 @@ function PromotionManager({ restaurantId, token }) {
             });
 
             if (response.ok) {
-                fetchPromotionImages(promotionId); // Aktualizuj obrazy dla promocji
+                fetchPromotionImages(promotionId);
             } else {
                 console.error("Failed to delete image");
             }
@@ -243,99 +239,75 @@ function PromotionManager({ restaurantId, token }) {
     };
 
     return (
-        <div>
-            <h1 className="text-primary text-center">Promocje:</h1>
+        <div className="promotion-container">
+            <h1 className="promotion-header">Promocje:</h1>
             {promotions.map((promotion) => (
                 <Card key={promotion.id} className="promotion-card">
                     <CardBody>
-                        <h5>{promotion.description}</h5>
-                        <CardSubtitle>
-                            Od: {new Date(promotion.startTime).toLocaleString()} <br/>
-                            Do: {new Date(promotion.endTime).toLocaleString()}
-                        </CardSubtitle>
-                        <div className="images-container mt-3">
+                        {/* Nagłówek promocji */}
+                        <h5 className="promotion-title">{promotion.description}</h5>
+                        <div className="promotion-dates">
+                            <strong><h4 color="green">Promocja trwa</h4></strong>
+                            <strong>Od:</strong> {new Date(promotion.startTime).toLocaleString()} <br/>
+                            <strong>Dd:</strong> {new Date(promotion.endTime).toLocaleString()}
+                        </div>
+
+                        {/* Kontener obrazów */}
+                        <div className="images-container">
                             {promotionImages[promotion.id]?.map((image) => (
-                                <div
-                                    key={image.id}
-                                    style={{
-                                        display: "inline-block",
-                                        margin: "10px",
-                                        position: "relative",
-                                    }}
-                                >
+                                <div className="image-wrapper" key={image.id}>
                                     <img
                                         src={image.path}
                                         alt={image.name}
-                                        style={{
-                                            maxWidth: "100px",
-                                            borderRadius: "5px",
-                                        }}
+                                        className="promotion-image"
                                     />
-                                    <Button
-                                        color="danger"
-                                        size="sm"
-                                        style={{
-                                            position: "absolute",
-                                            top: "5px",
-                                            right: "5px",
-                                            borderRadius: "50%",
-                                            padding: "0",
-                                            width: "20px",
-                                            height: "20px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                        }}
+                                    <button
+                                        className="delete-image-btn"
                                         onClick={() => handleDeleteImage(image.id, promotion.id)}
                                     >
                                         &times;
-                                    </Button>
+                                    </button>
                                 </div>
                             ))}
                         </div>
-                        <Form
+
+
+                        {/* Formularz dodawania obrazów */}
+                        <form
+                            className="promotion-form"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 handleAddImage(promotion.id);
                             }}
-                            className="mt-3"
                         >
-                            <FormGroup>
-                                <Label for={`imageFile-${promotion.id}`}>
-                                    Dodaj obraz do promocji:
-                                </Label>
-                                <Input
-                                    type="file"
-                                    name="imageFile"
-                                    id={`imageFile-${promotion.id}`}
-                                    onChange={handleFileChange}
-                                />
-                            </FormGroup>
-                            <Button color="success" type="submit">
+                            <label htmlFor={`imageFile-${promotion.id}`}>Dodaj obraz:</label>
+                            <input
+                                type="file"
+                                id={`imageFile-${promotion.id}`}
+                                onChange={handleFileChange}
+                            />
+                            <button type="submit" className="btn btn-success">
                                 Dodaj obraz
-                            </Button>
-                        </Form>
-                        <div style={{display: "flex", gap: "10px", marginTop: "10px"}}>
-                            <Button
-                                color="warning"
-                                onClick={() => handleEditPromotion(promotion)}
-                            >
-                                Edytuj
-                            </Button>
-                            <Button
-                                color="danger"
-                                onClick={() => handleDeletePromotion(promotion.id)}
-                            >
-                                Usuń
-                            </Button>
+                            </button>
+                        </form>
+
+                        {/* Przyciski edycji i usuwania promocji */}
+                        <div className="promotion-buttons"  style={{display: "flex", justifyContent: "center", marginTop: "60px"}}>
+                            <button className="btn btn-primary" onClick={() => handleEditPromotion(promotion)}>
+                                Edytuj Promocję
+                            </button>
+                            <button className="btn btn-danger" onClick={() => handleDeletePromotion(promotion.id)}>
+                                Usuń Promocję
+                            </button>
                         </div>
                     </CardBody>
                 </Card>
+
             ))}
 
             <div ref={formContainerRef}>
                 {isAddingOrEditing && (
-                    <Form onSubmit={handleAddOrEditPromotion} className="mt-3">
+                    <Form onSubmit={handleAddOrEditPromotion}>
                         <FormGroup>
                             <Label for="description">Opis Promocji</Label>
                             <Input
@@ -369,33 +341,31 @@ function PromotionManager({ restaurantId, token }) {
                                 required
                             />
                         </FormGroup>
-
-                        <div style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            gap: "10px",
-                            marginTop: "10px"
-                        }}>
+                        <div style={{display: "flex", justifyContent: "center", marginTop: "20px"}}>
                             <Button color="success" type="submit">
                                 {editingPromotion ? "Zapisz Zmiany" : "Dodaj Promocję"}
                             </Button>
-                            <Button color="danger" type="button" onClick={handleCancel}>
+                            <Button
+                                color="danger"
+                                type="button"
+                                onClick={handleCancel}
+                                style={{marginLeft: "15px"}}
+                            >
                                 Anuluj
                             </Button>
                         </div>
-
                     </Form>
                 )}
-
                 {!isAddingOrEditing && (
-                    <Button
-                        color="info"
-                        className="mt-3"
-                        onClick={() => setIsAddingOrEditing(true)}
-                    >
-                        Dodaj Promocję
-                    </Button>
+                    <div style={{display: "flex", justifyContent: "center", marginTop: "20px"}}>
+                        <Button color="info" onClick={() => setIsAddingOrEditing(true)}>
+                            <i
+                                className="nc-icon nc-simple-add"
+                                style={{marginRight: "10px"}}
+                            ></i>
+                            Dodaj Promocję
+                        </Button>
+                    </div>
                 )}
             </div>
         </div>

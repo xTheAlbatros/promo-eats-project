@@ -358,7 +358,6 @@ function Index() {
         <Container className="mt-5">
           <Row>
             <Col>
-              <h1 className="text-center mb-4 text-primary">Twoje restauracje:</h1>
               {restaurants.length === 0 && isLoggedIn && (
                   <h4 className="text-center text-muted text-warning">
                     Brak restauracji do wyświetlenia.
