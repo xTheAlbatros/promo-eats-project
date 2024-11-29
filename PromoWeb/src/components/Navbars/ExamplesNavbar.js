@@ -91,7 +91,7 @@ function ExamplesNavbar() {
               ) : (
                   <>
                     <NavItem>
-                      <Link onClick={handleLogout} className="nav-link" style={{ cursor: "pointer" }}>
+                      <Link onClick={handleLogout} className="nav-link" style={{ cursor: "pointer", color: "yellow"  }}>
                         Wyloguj
                       </Link>
                     </NavItem>

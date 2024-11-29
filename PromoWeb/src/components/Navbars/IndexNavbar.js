@@ -123,7 +123,7 @@ function IndexNavbar() {
                       </Button>
                     </NavItem>
                     <NavItem>
-                      <Link color="link" onClick={handleLogout} className="nav-link" style={{ cursor: "pointer", color: "white" }}>
+                      <Link color="link" onClick={handleLogout} className="nav-link" style={{ cursor: "pointer", color: "yellow" }}>
                         Wyloguj
                       </Link>
                     </NavItem>

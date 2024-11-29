@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Form, FormGroup, Label, Input, Button, FormFeedback } from "reactstrap";
 import LocationPicker from "./LocationPicker";
 
@@ -8,11 +8,54 @@ function RestaurantForm({
                             handleOpeningHoursChange,
                             handleLocationSelect,
                             handleFormSubmit,
-                            formErrors,
                             editingRestaurant,
                         }) {
+    const [formErrors, setFormErrors] = useState({});
+
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const validateWebsite = (website) => {
+        const websiteRegex = /^[^\s@]+\.[^\s@]+$/;
+        return websiteRegex.test(website);
+    };
+
+    const validateForm = () => {
+        const errors = {};
+        if (!formData.name) {
+            errors.name = "Nazwa restauracji jest wymagana.";
+        }
+        if (!formData.email || !validateEmail(formData.email)) {
+            errors.email = "Wprowadź poprawny adres e-mail.";
+        }
+        if (formData.webside && !validateWebsite(formData.webside)) {
+            errors.webside = "Wprowadź poprawny adres strony internetowej.";
+        }
+        if (!formData.phone) {
+            errors.phone = "Numer telefonu jest wymagany.";
+        }
+        if (!formData.location.latitude || !formData.location.longitude) {
+            errors.location = "Wybierz lokalizację na mapie.";
+        }
+        if (Object.values(formData.openingHours).some((hours) => !hours)) {
+            errors.openingHours = "Uzupełnij godziny otwarcia dla wszystkich dni.";
+        }
+        return errors;
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const errors = validateForm();
+        setFormErrors(errors);
+        if (Object.keys(errors).length === 0) {
+            handleFormSubmit(e);
+        }
+    };
+
     return (
-        <Form onSubmit={handleFormSubmit}>
+        <Form onSubmit={handleSubmit}>
             <h4>{editingRestaurant ? "Edytuj restaurację" : "Dodaj restaurację"}</h4>
             <FormGroup>
                 <Label for="name">Nazwa restauracji</Label>
@@ -46,7 +89,9 @@ function RestaurantForm({
                     id="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    invalid={!!formErrors.phone}
                 />
+                <FormFeedback>{formErrors.phone}</FormFeedback>
             </FormGroup>
             <FormGroup>
                 <Label for="webside">Strona internetowa</Label>
@@ -56,7 +101,9 @@ function RestaurantForm({
                     id="webside"
                     value={formData.webside}
                     onChange={handleInputChange}
+                    invalid={!!formErrors.webside}
                 />
+                <FormFeedback>{formErrors.webside}</FormFeedback>
             </FormGroup>
             <FormGroup>
                 <Label>Godziny otwarcia</Label>
@@ -79,6 +126,9 @@ function RestaurantForm({
             <FormGroup>
                 <Label>Wybierz lokalizację na mapie lub wpisz adres poniżej</Label>
                 <LocationPicker onLocationSelect={handleLocationSelect} />
+                {formErrors.location && (
+                    <p className="text-danger">{formErrors.location}</p>
+                )}
             </FormGroup>
             <p>
                 Wybrana lokalizacja: {formData.location.latitude},{" "}

@@ -1,131 +1,65 @@
-.footer{
+.footer {
     background-attachment: fixed;
     position: relative;
+    bottom: 0;
+    left: 0;
+    width: 100%;
     line-height: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding: 15px 0; /* Dodaj wewnętrzny padding w stopce */
 
-    .footer-nav{
-        ul{
+    .footer-logo {
+        height: 70px; /* Dostosuj wysokość logo */
+        margin-right: 40px; /* Odstęp między logo a tekstem */
+        margin-bottom: 10px; /* Dodaj odstęp od dolnej krawędzi */
+    }
+
+    .footer-nav {
+        ul {
+            display: flex; /* Ustaw elementy w jednej linii */
+            gap: 25px; /* Dostosuj odstęp między przyciskami */
+            list-style: none; /* Usuń znaczniki listy */
             padding-left: 0;
             margin-bottom: 0;
         }
-    }
-}
-.footer nav > ul {
-  list-style: none;
-  font-weight: normal;
-}
-.footer nav > ul > li{
-    display: inline-block;
-    padding: 10px 15px;
-    margin: 15px 3px;
-    line-height: 20px;
-    text-align: center;
-}
-.footer nav > ul a:not(.btn) {
-    color: #777777;
-    display: block;
-    margin-bottom: 3px;
-    line-height: 1.6;
-    opacity: .8;
-    font-size: 12px;
-    text-transform: uppercase;
-    font-weight: 600;
-}
-.footer nav > ul a:not(.btn):hover,
-.footer nav > ul a:not(.btn):focus {
-  color: #777777;
-  opacity: 1;
-}
-.footer .copyright {
-  color: #777777;
-  padding: 10px 0px;
-  font-size: 14px;
-  margin: 15px 3px;
-  line-height: 20px;
-  text-align: center;
-}
-.footer .heart{
-    color: #EB5E28;
-}
-.footer{
-    background-color: $white-color;
-    line-height: $line-height;
 
-    &.footer-black{
-        h4{
-            color: $white-color;
+        li {
+            padding: 0; /* Usuń dodatkowe odstępy */
+            margin: 0; /* Usuń dodatkowe odstępy */
         }
-    }
 
-    .links{
-        display: inline-block;
-
-        ul{
-            list-style: none;
-            margin: 0;
+        .nav-link {
+            color: #ffffff; /* Dopasowanie koloru do headera */
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+            background: none; /* Usuń domyślne tło */
+            border: none; /* Usuń domyślne obramowanie */
             padding: 0;
-            font-weight: $font-weight-bold;
+            cursor: pointer;
+            transition: color 0.2s;
 
-            > li{
-                display: inline-block;
-                padding-right: 20px;
-            }
-            > li:last-child{
-                padding-right: 0px;
-            }
-
-            a:not(.btn){
-                color: $font-color;
-                display: block;
-                font-size: $font-size-h6;
-                margin-bottom: 3px;
-                &:hover,
-                &:focus{
-                    color: $default-states-color;
-                }
-            }
-
-            &.uppercase-links{
-                text-transform: uppercase;
-            }
-            &.stacked-links{
-                margin-top: 10px;
-
-                > li{
-                    display: block;
-                    line-height: 26px;
-                }
-                h4{
-                    margin-top: 0px;
-                }
+            &:hover,
+            &:focus {
+                color: yellow; /* Dodaj efekt hover */
             }
         }
     }
-    .social-area{
-        padding: 15px 0;
-        .btn{
-            margin-bottom: 3px;
-            padding: 8px;
-            i{
-                margin-right: 0 !important;
-                color: #fff;
-            }
-        }
+
+    .copyright {
+        color: #777777;
+        padding: 10px 0px;
+        font-size: 14px;
+        margin: 15px 3px;
+        line-height: 20px;
+        text-align: left;
     }
-    hr{
-        border-color: $medium-gray;
-        border-width: 1px 0 0;
-        margin-top: 5px;
-        margin-bottom: 5px;
-    }
-    .copyright{
-        color: $brown-font-color;
-        font-size: 0.9em;
-        ul > li{
-            padding-right: 0px;
-        }
-    }
-    .title{
-        color: $default-states-color;
-    }
+}
+
+.section.profile-content {
+    min-height: calc(100vh - 100px);
+    padding-bottom: 150px;
 }

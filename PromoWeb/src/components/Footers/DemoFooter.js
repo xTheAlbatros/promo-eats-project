@@ -1,43 +1,42 @@
-/*!
-
-=========================================================
-* Paper Kit React - v1.3.2
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/paper-kit-react
-
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/paper-kit-react/blob/main/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-/*eslint-disable*/
 import React from "react";
-
-// reactstrap components
-import { Row, Container } from "reactstrap";
+import {Row, Container, Button} from "reactstrap";
+import { useNavigate } from "react-router-dom";
 
 function DemoFooter() {
+  const navigate = useNavigate();
+
+  // Sprawdzenie, czy użytkownik jest zalogowany
+  const isLoggedIn = !!localStorage.getItem("access_token");
+
+  // Obsługa przycisku "Profil"
+  const handleProfileClick = () => {
+    if (isLoggedIn) {
+      navigate("/profile-page");
+    } else {
+      navigate("/login-page");
+    }
+  };
+
   return (
-      <footer className="footer footer-black">
+      <footer className="footer">
         <Container>
-          <Row>
+          <Row className="align-items-center justify-content-start">
+            <img
+                src={require("assets/img/PromoEatsLogo.png")}
+                alt="PromoEats Logo"
+                className="footer-logo"
+            />
             <nav className="footer-nav">
               <ul>
                 <li>
-                  <a href="/" target="_self">
+                  <Button color="link" onClick={() => navigate("/index")} className="nav-link" style={{ cursor: "pointer", color: "white" }}>
                     Strona Główna
-                  </a>
+                  </Button>
                 </li>
                 <li>
-                  <a href="/profile-page" target="_self">
+                  <Button color="link" onClick={handleProfileClick} className="nav-link" style={{ cursor: "pointer", color: "white" }}>
                     Profil
-                  </a>
+                  </Button>
                 </li>
               </ul>
             </nav>
@@ -48,4 +47,3 @@ function DemoFooter() {
 }
 
 export default DemoFooter;
-

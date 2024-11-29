@@ -1,21 +1,3 @@
-/*!
-
-=========================================================
-* Paper Kit React - v1.3.2
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/paper-kit-react
-
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/paper-kit-react/blob/main/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
 import React, { useEffect, useState } from "react";
 import {
   Button,
@@ -145,126 +127,127 @@ function ProfilePage() {
 
   return (
       <>
-        <ExamplesNavbar />
-        <ProfilePageHeader />
-        <div className="section profile-content">
-          <Container>
-            <div className="owner">
-              <div className="avatar">
-                <img
-                    alt="..."
-                    className="img-circle img-no-padding img-responsive"
-                    src={require("assets/img/default-avatar.png")}
-                />
-              </div>
-              <div className="name">
-                <h4 className="title">
-                  {userData.name} {userData.surname}
-                  <br />
-                </h4>
-                <h6 className="description">{userData.email}</h6>
-              </div>
-            </div>
-            <Row>
-              <Col className="ml-auto mr-auto text-center" md="6">
-                <div style={{ marginBottom: "20px" }}>
-                  <Button
-                      className="btn-round"
-                      color="primary"
-                      onClick={() => {
-                        navigate("/");
-                        setTimeout(() => {
-                          const targetElement = document.getElementById("add-restaurant");
-                          if (targetElement) {
-                            targetElement.scrollIntoView({ behavior: "smooth" });
-                          }
-                        }, 100);
-                      }}
-                  >
-                    Twoje restauracje
-                  </Button>
+        <div className="page-container">
+          <ExamplesNavbar />
+          <ProfilePageHeader />
+          <div className="section profile-content">
+            <Container>
+              <div className="owner">
+                <div className="avatar">
+                  <img
+                      alt="..."
+                      className="img-circle img-no-padding img-responsive"
+                      src={require("assets/img/default-avatar.png")}
+                  />
                 </div>
-                <div>
-                  <Button
-                      className="btn-round"
-                      color="info"
-                      onClick={() => {
-                        setSuccessMessage("");
-                        setChangePasswordVisible(!changePasswordVisible);
-                      }}
-                  >
-                    Zmień hasło
-                  </Button>
+                <div className="name">
+                  <h4 className="title text-primary font-weight-bold">
+                    Witaj, {userData.name} {userData.surname}!
+                    <br />
+                  </h4>
                 </div>
-                {changePasswordVisible && (
-                    <Form onSubmit={handlePasswordChange} className="mt-3">
-                      <FormGroup>
-                        <Label for="currentPassword">Bieżące hasło</Label>
-                        <Input
-                            type="password"
-                            id="currentPassword"
-                            name="currentPassword"
-                            placeholder="Wpisz swoje bieżące hasło"
-                            value={passwordForm.currentPassword}
-                            onChange={(e) =>
-                                setPasswordForm({
-                                  ...passwordForm,
-                                  currentPassword: e.target.value,
-                                })
+              </div>
+              <Row>
+                <Col className="ml-auto mr-auto text-center" md="6">
+                  <div style={{ marginBottom: "10px" }}>
+                    <Button
+                        className="btn-round"
+                        color="primary"
+                        onClick={() => {
+                          navigate("/");
+                          setTimeout(() => {
+                            const targetElement = document.getElementById("add-restaurant");
+                            if (targetElement) {
+                              targetElement.scrollIntoView({ behavior: "smooth" });
                             }
-                            invalid={!!passwordErrors.currentPassword}
-                        />
-                        <FormFeedback>{passwordErrors.currentPassword}</FormFeedback>
-                      </FormGroup>
-                      <FormGroup>
-                        <Label for="newPassword">Nowe hasło</Label>
-                        <Input
-                            type="password"
-                            id="newPassword"
-                            name="newPassword"
-                            placeholder="Wpisz nowe hasło"
-                            value={passwordForm.newPassword}
-                            onChange={(e) =>
-                                setPasswordForm({
-                                  ...passwordForm,
-                                  newPassword: e.target.value,
-                                })
-                            }
-                            invalid={!!passwordErrors.newPassword}
-                        />
-                        <FormFeedback>{passwordErrors.newPassword}</FormFeedback>
-                      </FormGroup>
-                      <FormGroup>
-                        <Label for="confirmationPassword">Potwierdź nowe hasło</Label>
-                        <Input
-                            type="password"
-                            id="confirmationPassword"
-                            name="confirmationPassword"
-                            placeholder="Potwierdź nowe hasło"
-                            value={passwordForm.confirmationPassword}
-                            onChange={(e) =>
-                                setPasswordForm({
-                                  ...passwordForm,
-                                  confirmationPassword: e.target.value,
-                                })
-                            }
-                            invalid={!!passwordErrors.confirmationPassword}
-                        />
-                        <FormFeedback>{passwordErrors.confirmationPassword}</FormFeedback>
-                      </FormGroup>
-                      <Button color="success" type="submit">
-                        Zmień hasło
-                      </Button>
-                    </Form>
-                )}
-                {successMessage && (
-                    <p style={{ color: "green", marginTop: "10px" }}>{successMessage}</p>
-                )}
-              </Col>
-            </Row>
-          </Container>
+                          }, 100);
+                        }}
+                    >
+                      Twoje restauracje
+                    </Button>
+                  </div>
+                  <div>
+                    <Button
+                        className="btn-round"
+                        color="info"
+                        onClick={() => {
+                          setSuccessMessage("");
+                          setChangePasswordVisible(!changePasswordVisible);
+                        }}
+                    >
+                      Zmień hasło
+                    </Button>
+                  </div>
+                  {changePasswordVisible && (
+                      <Form onSubmit={handlePasswordChange} className="mt-3">
+                        <FormGroup>
+                          <Label for="currentPassword">Bieżące hasło</Label>
+                          <Input
+                              type="password"
+                              id="currentPassword"
+                              name="currentPassword"
+                              placeholder="Wpisz swoje bieżące hasło"
+                              value={passwordForm.currentPassword}
+                              onChange={(e) =>
+                                  setPasswordForm({
+                                    ...passwordForm,
+                                    currentPassword: e.target.value,
+                                  })
+                              }
+                              invalid={!!passwordErrors.currentPassword}
+                          />
+                          <FormFeedback>{passwordErrors.currentPassword}</FormFeedback>
+                        </FormGroup>
+                        <FormGroup>
+                          <Label for="newPassword">Nowe hasło</Label>
+                          <Input
+                              type="password"
+                              id="newPassword"
+                              name="newPassword"
+                              placeholder="Wpisz nowe hasło"
+                              value={passwordForm.newPassword}
+                              onChange={(e) =>
+                                  setPasswordForm({
+                                    ...passwordForm,
+                                    newPassword: e.target.value,
+                                  })
+                              }
+                              invalid={!!passwordErrors.newPassword}
+                          />
+                          <FormFeedback>{passwordErrors.newPassword}</FormFeedback>
+                        </FormGroup>
+                        <FormGroup>
+                          <Label for="confirmationPassword">Potwierdź nowe hasło</Label>
+                          <Input
+                              type="password"
+                              id="confirmationPassword"
+                              name="confirmationPassword"
+                              placeholder="Potwierdź nowe hasło"
+                              value={passwordForm.confirmationPassword}
+                              onChange={(e) =>
+                                  setPasswordForm({
+                                    ...passwordForm,
+                                    confirmationPassword: e.target.value,
+                                  })
+                              }
+                              invalid={!!passwordErrors.confirmationPassword}
+                          />
+                          <FormFeedback>{passwordErrors.confirmationPassword}</FormFeedback>
+                        </FormGroup>
+                        <Button color="success" type="submit">
+                          Zmień hasło
+                        </Button>
+                      </Form>
+                  )}
+                  {successMessage && (
+                      <p style={{ color: "green", marginTop: "10px" }}>{successMessage}</p>
+                  )}
+                </Col>
+              </Row>
+            </Container>
+          </div>
+          <DemoFooter />
         </div>
-        <DemoFooter />
       </>
   );
 }

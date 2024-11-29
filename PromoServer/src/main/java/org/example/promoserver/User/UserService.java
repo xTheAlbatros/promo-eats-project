@@ -81,10 +81,10 @@ public class UserService {
         Users user = (Users) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new UserBadRequestException("Wrong password");
+            throw new UserBadRequestException("Błędne hasło");
         }
         if(!request.getNewPassword().equals(request.getConfirmationPassword())){
-            throw new UserBadRequestException("Passwords do not match");
+            throw new UserBadRequestException("Hasła nie są identyczne");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
