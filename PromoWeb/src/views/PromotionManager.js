@@ -7,7 +7,6 @@ import {
     Input,
     Card,
     CardBody,
-    CardSubtitle,
 } from "reactstrap";
 import "./PromotionManager.css"; // Plik CSS do poprawy wizualnej
 
@@ -23,6 +22,29 @@ function PromotionManager({ restaurantId, token }) {
     const [promotionImages, setPromotionImages] = useState({});
     const [imageFile, setImageFile] = useState(null);
     const formContainerRef = useRef(null);
+
+    const fetchPromotionImages = async (promotionId) => {
+        try {
+            const response = await fetch(
+                `http://localhost:8082/api/promotion/${promotionId}/images`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            if (response.ok) {
+                const images = await response.json();
+                setPromotionImages((prevImages) => ({
+                    ...prevImages,
+                    [promotionId]: images,
+                }));
+            } else {
+                console.error("Failed to fetch images");
+            }
+        } catch (error) {
+            console.error("Error fetching images:", error);
+        }
+    }
 
     const fetchPromotions = useCallback(async () => {
         try {
@@ -47,29 +69,6 @@ function PromotionManager({ restaurantId, token }) {
             console.error("Error fetching promotions:", error);
         }
     }, [restaurantId, token]);
-
-    const fetchPromotionImages = async (promotionId) => {
-        try {
-            const response = await fetch(
-                `http://localhost:8082/api/promotion/${promotionId}/images`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-
-            if (response.ok) {
-                const images = await response.json();
-                setPromotionImages((prevImages) => ({
-                    ...prevImages,
-                    [promotionId]: images,
-                }));
-            } else {
-                console.error("Failed to fetch images");
-            }
-        } catch (error) {
-            console.error("Error fetching images:", error);
-        }
-    };
 
     useEffect(() => {
         fetchPromotions();

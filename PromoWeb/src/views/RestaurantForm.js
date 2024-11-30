@@ -130,10 +130,6 @@ function RestaurantForm({
                     <p className="text-danger">{formErrors.location}</p>
                 )}
             </FormGroup>
-            <p>
-                Wybrana lokalizacja: {formData.location.latitude},{" "}
-                {formData.location.longitude}
-            </p>
             <div className="form-button-container">
                 <Button color="success" type="submit">
                     {editingRestaurant ? "Zapisz zmiany" : "Dodaj restaurację"}
