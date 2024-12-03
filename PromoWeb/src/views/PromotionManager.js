@@ -8,7 +8,7 @@ import {
     Card,
     CardBody,
 } from "reactstrap";
-import "./PromotionManager.css"; // Plik CSS do poprawy wizualnej
+import "./PromotionManager.css";
 
 function PromotionManager({ restaurantId, token }) {
     const [promotions, setPromotions] = useState([]);
@@ -18,6 +18,7 @@ function PromotionManager({ restaurantId, token }) {
         startTime: "",
         endTime: "",
     });
+    const [promotionErrors, setPromotionErrors] = useState({});
     const [editingPromotion, setEditingPromotion] = useState(null);
     const [promotionImages, setPromotionImages] = useState({});
     const [imageFile, setImageFile] = useState(null);
@@ -44,7 +45,7 @@ function PromotionManager({ restaurantId, token }) {
         } catch (error) {
             console.error("Error fetching images:", error);
         }
-    }
+    };
 
     const fetchPromotions = useCallback(async () => {
         try {
@@ -79,8 +80,40 @@ function PromotionManager({ restaurantId, token }) {
         setPromotionData({ ...promotionData, [name]: value });
     };
 
+    const validatePromotionDates = (startTime, endTime) => {
+        const errors = {};
+        const now = new Date();
+
+        if (new Date(startTime) < now) {
+            errors.startTime = "Data rozpoczęcia nie może być wcześniejsza niż aktualna.";
+        }
+
+        if (new Date(endTime) < now) {
+            errors.endTime = "Data zakończenia nie może być wcześniejsza niż aktualna.";
+        }
+
+        if (new Date(endTime) < new Date(startTime)) {
+            errors.endTime = "Data zakończenia nie może być wcześniejsza niż data rozpoczęcia.";
+        }
+
+        return errors;
+    };
+
     const handleAddOrEditPromotion = async (e) => {
         e.preventDefault();
+
+        // Walidacja dat
+        const dateErrors = validatePromotionDates(
+            promotionData.startTime,
+            promotionData.endTime
+        );
+
+        if (Object.keys(dateErrors).length > 0) {
+            setPromotionErrors(dateErrors);
+            return;
+        }
+
+        setPromotionErrors({});
 
         const url = editingPromotion
             ? "http://localhost:8082/api/promotion"
@@ -92,7 +125,8 @@ function PromotionManager({ restaurantId, token }) {
                 method,
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}` },
+                    Authorization: `Bearer ${token}`,
+                },
                 body: JSON.stringify({
                     id: editingPromotion?.id,
                     description: promotionData.description,
@@ -243,15 +277,11 @@ function PromotionManager({ restaurantId, token }) {
             {promotions.map((promotion) => (
                 <Card key={promotion.id} className="promotion-card">
                     <CardBody>
-                        {/* Nagłówek promocji */}
                         <h5 className="promotion-title">{promotion.description}</h5>
                         <div className="promotion-dates">
-                            <strong><h4 color="green">Promocja trwa</h4></strong>
-                            <strong>Od:</strong> {new Date(promotion.startTime).toLocaleString()} <br/>
-                            <strong>Dd:</strong> {new Date(promotion.endTime).toLocaleString()}
+                            <strong>Od:</strong> {new Date(promotion.startTime).toLocaleString()} <br />
+                            <strong>Do:</strong> {new Date(promotion.endTime).toLocaleString()}
                         </div>
-
-                        {/* Kontener obrazów */}
                         <div className="images-container">
                             {promotionImages[promotion.id]?.map((image) => (
                                 <div className="image-wrapper" key={image.id}>
@@ -269,9 +299,6 @@ function PromotionManager({ restaurantId, token }) {
                                 </div>
                             ))}
                         </div>
-
-
-                        {/* Formularz dodawania obrazów */}
                         <form
                             className="promotion-form"
                             onSubmit={(e) => {
@@ -289,21 +316,23 @@ function PromotionManager({ restaurantId, token }) {
                                 Dodaj obraz
                             </button>
                         </form>
-
-                        {/* Przyciski edycji i usuwania promocji */}
-                        <div className="promotion-buttons"  style={{display: "flex", justifyContent: "center", marginTop: "60px"}}>
-                            <button className="btn btn-primary" onClick={() => handleEditPromotion(promotion)}>
+                        <div className="promotion-buttons" style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => handleEditPromotion(promotion)}
+                            >
                                 Edytuj Promocję
                             </button>
-                            <button className="btn btn-danger" onClick={() => handleDeletePromotion(promotion.id)}>
+                            <button
+                                className="btn btn-danger"
+                                onClick={() => handleDeletePromotion(promotion.id)}
+                            >
                                 Usuń Promocję
                             </button>
                         </div>
                     </CardBody>
                 </Card>
-
             ))}
-
             <div ref={formContainerRef}>
                 {isAddingOrEditing && (
                     <Form onSubmit={handleAddOrEditPromotion}>
@@ -319,37 +348,41 @@ function PromotionManager({ restaurantId, token }) {
                             />
                         </FormGroup>
                         <FormGroup>
-                            <Label for="startTime">Czas rozpoczęcia</Label>
+                            <Label for="startTime">Data rozpoczęcia</Label>
                             <Input
                                 type="datetime-local"
                                 name="startTime"
                                 id="startTime"
                                 value={promotionData.startTime}
                                 onChange={handleInputChange}
+                                invalid={!!promotionErrors.startTime}
                                 required
                             />
+                            {promotionErrors.startTime && (
+                                <div className="text-danger">{promotionErrors.startTime}</div>
+                            )}
                         </FormGroup>
                         <FormGroup>
-                            <Label for="endTime">Czas zakończenia</Label>
+                            <Label for="endTime">Data zakończenia</Label>
                             <Input
                                 type="datetime-local"
                                 name="endTime"
                                 id="endTime"
                                 value={promotionData.endTime}
                                 onChange={handleInputChange}
+                                invalid={!!promotionErrors.endTime}
                                 required
                             />
+                            {promotionErrors.endTime && (
+                                <div className="text-danger">{promotionErrors.endTime}</div>
+                            )}
                         </FormGroup>
-                        <div style={{display: "flex", justifyContent: "center", marginTop: "20px"}}>
+                        <div className="form-buttons"
+                             style={{display: "flex", justifyContent: "center", gap: "10px", marginTop: "20px"}}>
                             <Button color="success" type="submit">
                                 {editingPromotion ? "Zapisz Zmiany" : "Dodaj Promocję"}
                             </Button>
-                            <Button
-                                color="danger"
-                                type="button"
-                                onClick={handleCancel}
-                                style={{marginLeft: "15px"}}
-                            >
+                            <Button color="danger" type="button" onClick={handleCancel}>
                                 Anuluj
                             </Button>
                         </div>
@@ -358,10 +391,7 @@ function PromotionManager({ restaurantId, token }) {
                 {!isAddingOrEditing && (
                     <div style={{display: "flex", justifyContent: "center", marginTop: "20px"}}>
                         <Button color="info" onClick={() => setIsAddingOrEditing(true)}>
-                            <i
-                                className="nc-icon nc-simple-add"
-                                style={{marginRight: "10px"}}
-                            ></i>
+                            <i className="nc-icon nc-simple-add" style={{ marginRight: "10px" }}></i>
                             Dodaj Promocję
                         </Button>
                     </div>

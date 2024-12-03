@@ -22,6 +22,11 @@ function RestaurantForm({
         return websiteRegex.test(website);
     };
 
+    const validateOpeningHours = (hours) => {
+        const hoursRegex = /^([01]\d|2[0-3]):([0-5]\d)-([01]\d|2[0-3]):([0-5]\d)$/;
+        return hoursRegex.test(hours);
+    };
+
     const validateForm = () => {
         const errors = {};
         if (!formData.name) {
@@ -39,8 +44,17 @@ function RestaurantForm({
         if (!formData.location.latitude || !formData.location.longitude) {
             errors.location = "Wybierz lokalizację na mapie.";
         }
-        if (Object.values(formData.openingHours).some((hours) => !hours)) {
-            errors.openingHours = "Uzupełnij godziny otwarcia dla wszystkich dni.";
+        const openingHoursErrors = {};
+        Object.entries(formData.openingHours).forEach(([day, hours]) => {
+            if (!hours) {
+                openingHoursErrors[day] = "Uzupełnij godziny otwarcia.";
+            } else if (!validateOpeningHours(hours)) {
+                openingHoursErrors[day] = "Nieprawidłowy format godzin (np. 08:00-18:00).";
+            }
+        });
+
+        if (Object.keys(openingHoursErrors).length > 0) {
+            errors.openingHours = openingHoursErrors;
         }
         return errors;
     };
@@ -117,11 +131,13 @@ function RestaurantForm({
                             placeholder="Np. 08:00-18:00"
                             value={formData.openingHours[day]}
                             onChange={handleOpeningHoursChange}
-                            invalid={!!formErrors.openingHours}
+                            invalid={!!(formErrors.openingHours && formErrors.openingHours[day])}
                         />
+                        {formErrors.openingHours && formErrors.openingHours[day] && (
+                            <FormFeedback>{formErrors.openingHours[day]}</FormFeedback>
+                        )}
                     </div>
                 ))}
-                <FormFeedback>{formErrors.openingHours}</FormFeedback>
             </FormGroup>
             <FormGroup>
                 <Label>Wybierz lokalizację na mapie lub wpisz adres poniżej</Label>

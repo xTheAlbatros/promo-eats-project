@@ -101,7 +101,7 @@ function Index() {
         setCategories(data);
       }
     } catch (error) {
-      console.error("Błąd podczas pobierania kategorii:", error);
+      console.error("Błąd podData pobierania kategorii:", error);
     }
   };
 
