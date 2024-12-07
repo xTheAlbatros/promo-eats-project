@@ -54,7 +54,7 @@ public class RestaurantController {
         return restaurantService.findRestaurantsByLocationAndRange(location, range);
     }
 
-    @GetMapping("/restaurants/location/categories")
+    @PostMapping("/restaurants/location/categories")
     public List<ViewRestaurant> getRestaurantsByLocationAndRangeAndCategories(@RequestParam Double latitude, @RequestParam Double longitude, @RequestParam int range, @RequestBody List<String> categories){
         Location location = new Location();
         location.setLatitude(latitude);
