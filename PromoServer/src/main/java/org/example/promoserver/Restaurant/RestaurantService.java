@@ -137,5 +137,36 @@ public class RestaurantService {
                 .orElseThrow(RestaurantNotFoundException::new);
     }
 
+    @Transactional
+    public List<ViewRestaurant> findRestaurantsByLocationAndRangeAndCategories(Location location, int range, List<String> categories) {
+        List<Restaurants> allRestaurants = restaurantRepository.findAll();
+        Double rangeD = Double.valueOf(range);
+
+        List<Restaurants> filteredByRange = allRestaurants.stream()
+                .filter(restaurant -> {
+                    double distance = DistanceCalculator.calculateDistance(location, restaurant.getLocation());
+                    return distance <= rangeD;
+                })
+                .collect(Collectors.toList());
+
+        List<Restaurants> filteredByCategories = filteredByRange.stream()
+                .filter(restaurant -> {
+                    List<String> restaurantCategories = restaurant.getRestaurantsCategories().stream()
+                            .map(restCat -> restCat.getCategories().getName())
+                            .collect(Collectors.toList());
+
+                    return restaurantCategories.containsAll(categories);
+                })
+                .collect(Collectors.toList());
+
+        return Optional.ofNullable(filteredByCategories)
+                .filter(list -> !list.isEmpty())
+                .map(list -> list.stream()
+                        .map(restaurantMapper::mapRestaurantsToView)
+                        .collect(Collectors.toList()))
+                .orElseThrow(RestaurantNotFoundException::new);
+    }
+
+
 
 }
