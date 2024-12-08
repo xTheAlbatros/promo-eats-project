@@ -10,17 +10,18 @@ import org.example.promoserver.Restaurant.RestaurantMapper;
 import org.example.promoserver.Restaurant.RestaurantRepository;
 import org.example.promoserver.Restaurant.RestaurantService;
 import org.example.promoserver.Restaurant.dto.AddRestaurant;
+import org.example.promoserver.Restaurant.dto.UpdateRestaurant;
 import org.example.promoserver.Restaurant.dto.ViewRestaurant;
 import org.example.promoserver.Restaurant.exception.RestaurantNotFoundException;
 import org.example.promoserver.Restaurant.exception.RestaurantBadRequestException;
 import org.example.promoserver.Shared.DistanceCalculator;
 import org.example.promoserver.User.UserRepository;
-import org.example.promoserver.User.exception.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import java.util.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 public class RestaurantServiceTest {
 
@@ -41,7 +42,7 @@ public class RestaurantServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    // Test 1: Sprawdza metode getAllRestaurant() gdy restauracje sa dostepne
+    // Test 1: Sprawdza metodę getAllRestaurant() gdy restauracje są dostępne
     @Test
     public void testGetAllRestaurant_WhenRestaurantsArePresent() {
 
@@ -56,30 +57,29 @@ public class RestaurantServiceTest {
 
         when(restaurantMapper.mapRestaurantsToView(restaurant)).thenReturn(viewRestaurant);
 
-
         List<ViewRestaurant> result = restaurantService.getAllRestaurant();
-
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Testowa Restauracja", result.get(0).getName());
     }
 
-    // Test 2: Sprawdza metode getAllRestaurant() gdy nie ma restauracji
+    // Test 2: Sprawdza metodę getAllRestaurant() gdy nie ma restauracji
     @Test
     public void testGetAllRestaurant_WhenNoRestaurantsPresent() {
-
         when(restaurantRepository.findAll()).thenReturn(Collections.emptyList());
 
-
-        assertThrows(RestaurantNotFoundException.class, () -> {
-            restaurantService.getAllRestaurant();
-        });
+        assertThrows(RestaurantNotFoundException.class, () -> restaurantService.getAllRestaurant());
     }
 
-    // Test 3: Sprawdza metode saveRestaurant()
+    // Test 3: Sprawdza metodę saveRestaurant() - dane poprawne
     @Test
-    public void testSaveRestaurant() {
+    public void testSaveRestaurant_WithValidData() {
+        // Mock Principal (logowanie)
+        Users user = new Users();
+        user.setId(10);
+        UsernamePasswordAuthenticationToken authentication = mock(UsernamePasswordAuthenticationToken.class);
+        when(authentication.getPrincipal()).thenReturn(user);
 
         AddRestaurant addRestaurant = new AddRestaurant();
         addRestaurant.setName("Testowa Restauracja");
@@ -93,32 +93,43 @@ public class RestaurantServiceTest {
         Restaurants restaurant = new Restaurants();
         when(restaurantMapper.mapAddToRestaurants(addRestaurant)).thenReturn(restaurant);
 
-
-        restaurantService.saveRestaurant(addRestaurant);
-
+        restaurantService.saveRestaurant(addRestaurant, authentication);
 
         verify(restaurantRepository, times(1)).save(restaurant);
+        assertEquals(user, restaurant.getUsers());
     }
 
-    // Test 4: Sprawdza metode deleteRestaurant() gdy restauracja istnieje
+    // Test 4: Sprawdza metodę saveRestaurant() - nieprawidłowe dane
+    @Test
+    public void testSaveRestaurant_WithInvalidData() {
+        // Mock Principal
+        Users user = new Users();
+        UsernamePasswordAuthenticationToken authentication = mock(UsernamePasswordAuthenticationToken.class);
+        when(authentication.getPrincipal()).thenReturn(user);
+
+        AddRestaurant addRestaurant = new AddRestaurant();
+        // brak wymaganych danych (np. name)
+
+        assertThrows(RestaurantBadRequestException.class, () -> {
+            restaurantService.saveRestaurant(addRestaurant, authentication);
+        });
+    }
+
+    // Test 5: Sprawdza metodę deleteRestaurant() gdy restauracja istnieje
     @Test
     public void testDeleteRestaurant_WhenRestaurantIsPresent() {
-
         Integer restaurantId = 1;
         Restaurants restaurant = new Restaurants();
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
 
-
         restaurantService.deleteRestaurant(restaurantId);
-
 
         verify(restaurantRepository, times(1)).deleteById(restaurantId);
     }
 
-    // Test 5: Sprawdza metode deleteRestaurant() gdy restauracja nie istnieje
+    // Test 6: Sprawdza metodę deleteRestaurant() gdy restauracja nie istnieje
     @Test
     public void testDeleteRestaurant_WhenRestaurantIsNotPresent() {
-
         Integer restaurantId = 1;
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.empty());
 
@@ -127,7 +138,7 @@ public class RestaurantServiceTest {
         });
     }
 
-    // Test 6: Sprawdza metode findRestaurantById() gdy restauracja istnieje
+    // Test 7: Sprawdza metodę findRestaurantById() gdy restauracja istnieje
     @Test
     public void testFindRestaurantById_WhenRestaurantIsPresent() {
         Integer restaurantId = 1;
@@ -145,7 +156,7 @@ public class RestaurantServiceTest {
         assertEquals("Testowa Restauracja", result.getName());
     }
 
-    // Test 7: Sprawdza metode findRestaurantById() gdy restauracja nie istnieje
+    // Test 8: Sprawdza metodę findRestaurantById() gdy restauracja nie istnieje
     @Test
     public void testFindRestaurantById_WhenRestaurantIsNotPresent() {
         Integer restaurantId = 1;
@@ -156,9 +167,9 @@ public class RestaurantServiceTest {
         });
     }
 
-    // Test 8: Sprawdza metode findRestaurantsByLocationAndRange() gdy restauracje sa w zasiegu
+    // Test 9: Sprawdza metodę findRestaurantsByLocationAndRange() gdy restauracje są w zasięgu
     @Test
-    public void testFindRestaurantsByLocationAndRange_WhenRestaurantsWithinRange() {
+    public void testFindRestaurantsByLocationAndRange_WhenWithinRange() {
         Location location = new Location();
         location.setLatitude(52.2297);
         location.setLongitude(21.0122);
@@ -166,7 +177,7 @@ public class RestaurantServiceTest {
 
         Restaurants restaurant = new Restaurants();
         restaurant.setLocation(location);
-        List<Restaurants> restaurantList = Arrays.asList(restaurant);
+        List<Restaurants> restaurantList = Collections.singletonList(restaurant);
 
         when(restaurantRepository.findAll()).thenReturn(restaurantList);
         when(restaurantMapper.mapRestaurantsToView(any())).thenReturn(new ViewRestaurant());
@@ -181,7 +192,7 @@ public class RestaurantServiceTest {
         }
     }
 
-    // Test 9: Sprawdza metode findRestaurantsByLocationAndRange() gdy brak restauracji w zasiegu
+    // Test 10: Sprawdza metodę findRestaurantsByLocationAndRange() gdy brak restauracji w zasięgu
     @Test
     public void testFindRestaurantsByLocationAndRange_WhenNoRestaurantsWithinRange() {
         Location location = new Location();
@@ -191,7 +202,7 @@ public class RestaurantServiceTest {
 
         Restaurants restaurant = new Restaurants();
         restaurant.setLocation(location);
-        List<Restaurants> restaurantList = Arrays.asList(restaurant);
+        List<Restaurants> restaurantList = Collections.singletonList(restaurant);
 
         when(restaurantRepository.findAll()).thenReturn(restaurantList);
 
@@ -204,62 +215,67 @@ public class RestaurantServiceTest {
         }
     }
 
-    // Test 10: Sprawdza metode addOwnerToRestaurant() gdy restauracja i uzytkownik istnieja
+    // Test 11: Sprawdza metodę getAllRestaurantForOwner() gdy właściciel ma restauracje
     @Test
-    public void testAddOwnerToRestaurant_WhenBothExist() {
-        Integer ownerId = 1;
-        Integer restaurantId = 1;
+    public void testGetAllRestaurantForOwner_WithRestaurants() {
+        Users user = new Users();
+        user.setId(2);
+
+        UsernamePasswordAuthenticationToken authentication = mock(UsernamePasswordAuthenticationToken.class);
+        when(authentication.getPrincipal()).thenReturn(user);
 
         Restaurants restaurant = new Restaurants();
-        Users user = new Users();
+        restaurant.setName("Moja Restauracja");
+        restaurant.setUsers(user);
 
-        when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
-        when(userRepository.findById(ownerId)).thenReturn(Optional.of(user));
+        when(restaurantRepository.findAllByUsers(user)).thenReturn(Collections.singletonList(restaurant));
 
-        restaurantService.addOwnerToRestaurant(ownerId, restaurantId);
+        ViewRestaurant viewRestaurant = new ViewRestaurant();
+        viewRestaurant.setName("Moja Restauracja");
+        when(restaurantMapper.mapRestaurantsToView(restaurant)).thenReturn(viewRestaurant);
 
-        verify(restaurantRepository, times(1)).findById(restaurantId);
-        verify(userRepository, times(1)).findById(ownerId);
-        assertEquals(user, restaurant.getUsers());
+        List<ViewRestaurant> result = restaurantService.getAllRestaurantForOwner(authentication);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Moja Restauracja", result.get(0).getName());
     }
 
-    // Test 11: Sprawdza metodę addOwnerToRestaurant() gdy restauracja nie istnieje
+    // Test 12: Sprawdza metodę getAllRestaurantForOwner() gdy właściciel nie ma restauracji
     @Test
-    public void testAddOwnerToRestaurant_WhenRestaurantNotFound() {
-        Integer ownerId = 1;
-        Integer restaurantId = 1;
+    public void testGetAllRestaurantForOwner_NoRestaurants() {
+        Users user = new Users();
+        user.setId(2);
 
-        when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.empty());
+        UsernamePasswordAuthenticationToken authentication = mock(UsernamePasswordAuthenticationToken.class);
+        when(authentication.getPrincipal()).thenReturn(user);
+
+        when(restaurantRepository.findAllByUsers(user)).thenReturn(Collections.emptyList());
 
         assertThrows(RestaurantNotFoundException.class, () -> {
-            restaurantService.addOwnerToRestaurant(ownerId, restaurantId);
+            restaurantService.getAllRestaurantForOwner(authentication);
         });
     }
 
-    // Test 12: Sprawdza metodę addOwnerToRestaurant() gdy uzytkownik nie istnieje
+    // Test 13: Sprawdza metodę updateRestaurant()
     @Test
-    public void testAddOwnerToRestaurant_WhenUserNotFound() {
-        Integer ownerId = 1;
-        Integer restaurantId = 1;
+    public void testUpdateRestaurant() {
+        UpdateRestaurant updateRestaurant = new UpdateRestaurant();
+        updateRestaurant.setId(1);
+        updateRestaurant.setName("Nowa Nazwa");
+        updateRestaurant.setEmail("new@example.com");
 
-        Restaurants restaurant = new Restaurants();
+        Restaurants existing = new Restaurants();
+        existing.setId(1);
+        existing.setName("Stara Nazwa");
+        existing.setEmail("old@example.com");
 
-        when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
-        when(userRepository.findById(ownerId)).thenReturn(Optional.empty());
+        when(restaurantRepository.findById(1)).thenReturn(Optional.of(existing));
 
-        assertThrows(UserNotFoundException.class, () -> {
-            restaurantService.addOwnerToRestaurant(ownerId, restaurantId);
-        });
+        restaurantService.updateRestaurant(updateRestaurant);
+
+        verify(restaurantRepository, times(1)).save(existing);
+        assertEquals("Nowa Nazwa", existing.getName());
+        assertEquals("new@example.com", existing.getEmail());
     }
 
-    // Test 13: Sprawdza metode saveRestaurant() z nieprawidlowymi danymi
-    @Test
-    public void testSaveRestaurant_WithInvalidData() {
-        AddRestaurant addRestaurant = new AddRestaurant();
-
-        assertThrows(RestaurantBadRequestException.class, () -> {
-            restaurantService.saveRestaurant(addRestaurant);
-        });
-    }
 }
-
