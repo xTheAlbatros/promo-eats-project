@@ -1,0 +1,65 @@
+.footer {
+    background-attachment: fixed;
+    position: relative;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    line-height: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding: 15px 0; /* Dodaj wewnętrzny padding w stopce */
+
+    .footer-logo {
+        height: 70px; /* Dostosuj wysokość logo */
+        margin-right: 40px; /* Odstęp między logo a tekstem */
+        margin-bottom: 10px; /* Dodaj odstęp od dolnej krawędzi */
+    }
+
+    .footer-nav {
+        ul {
+            display: flex; /* Ustaw elementy w jednej linii */
+            gap: 25px; /* Dostosuj odstęp między przyciskami */
+            list-style: none; /* Usuń znaczniki listy */
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        li {
+            padding: 0; /* Usuń dodatkowe odstępy */
+            margin: 0; /* Usuń dodatkowe odstępy */
+        }
+
+        .nav-link {
+            color: #ffffff; /* Dopasowanie koloru do headera */
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+            background: none; /* Usuń domyślne tło */
+            border: none; /* Usuń domyślne obramowanie */
+            padding: 0;
+            cursor: pointer;
+            transition: color 0.2s;
+
+            &:hover,
+            &:focus {
+                color: yellow; /* Dodaj efekt hover */
+            }
+        }
+    }
+
+    .copyright {
+        color: #777777;
+        padding: 10px 0px;
+        font-size: 14px;
+        margin: 15px 3px;
+        line-height: 20px;
+        text-align: left;
+    }
+}
+
+.section.profile-content {
+    min-height: calc(100vh - 100px);
+    padding-bottom: 150px;
+}

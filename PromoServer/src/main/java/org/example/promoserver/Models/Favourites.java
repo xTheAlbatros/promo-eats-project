@@ -1,16 +1,14 @@
 package org.example.promoserver.Models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Favourites {
 
     @Id
@@ -21,7 +19,7 @@ public class Favourites {
     @JoinColumn(name = "user_id", nullable = true)
     private Users users;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "restaurant_id")
     private Restaurants restaurants;
 }

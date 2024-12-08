@@ -4,10 +4,12 @@ package org.example.promoserver.Restaurant;
 import lombok.RequiredArgsConstructor;
 import org.example.promoserver.Models.Location;
 import org.example.promoserver.Restaurant.dto.AddRestaurant;
+import org.example.promoserver.Restaurant.dto.UpdateRestaurant;
 import org.example.promoserver.Restaurant.dto.ViewRestaurant;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -18,8 +20,8 @@ public class RestaurantController {
     private final RestaurantService restaurantService;
 
     @PostMapping("/restaurant")
-    public ResponseEntity<Void> addRestaurant(@RequestBody AddRestaurant addRestaurant){
-        restaurantService.saveRestaurant(addRestaurant);
+    public ResponseEntity<Void> addRestaurant(@RequestBody AddRestaurant addRestaurant, Principal connectedUser){
+        restaurantService.saveRestaurant(addRestaurant, connectedUser);
         return ResponseEntity.ok().build();
     }
 
@@ -39,6 +41,11 @@ public class RestaurantController {
         return restaurantService.getAllRestaurant();
     }
 
+    @GetMapping("/restaurants/owner")
+    public List<ViewRestaurant> getAllRestaurantsForOwner(Principal connectedUser){
+        return restaurantService.getAllRestaurantForOwner(connectedUser);
+    }
+
     @GetMapping("/restaurants/location")
     public List<ViewRestaurant> getRestaurantsByLocationAndRange(@RequestParam Double latitude, @RequestParam Double longitude, @RequestParam int range){
         Location location = new Location();
@@ -47,10 +54,17 @@ public class RestaurantController {
         return restaurantService.findRestaurantsByLocationAndRange(location, range);
     }
 
-    @PostMapping("/restaurant/{restaurantId}/owner/{ownerId}")
-    public ResponseEntity<Void> addOwnerToRestaurant(@PathVariable Integer ownerId, @PathVariable Integer restaurantId){
-        restaurantService.addOwnerToRestaurant(ownerId, restaurantId);
-        return ResponseEntity.ok().build();
+    @PostMapping("/restaurants/location/categories")
+    public List<ViewRestaurant> getRestaurantsByLocationAndRangeAndCategories(@RequestParam Double latitude, @RequestParam Double longitude, @RequestParam int range, @RequestBody List<String> categories){
+        Location location = new Location();
+        location.setLatitude(latitude);
+        location.setLongitude(longitude);
+        return restaurantService.findRestaurantsByLocationAndRangeAndCategories(location, range, categories);
     }
 
+    @PutMapping("/restaurant")
+    public ResponseEntity<Void> updateRestaurant(@RequestBody UpdateRestaurant updateRestaurant){
+        restaurantService.updateRestaurant(updateRestaurant);
+        return ResponseEntity.ok().build();
+    }
 }

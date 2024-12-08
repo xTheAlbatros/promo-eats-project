@@ -1,0 +1,146 @@
+/* Karta promocji */
+.promotion-card {
+    border-radius: 16px;
+    background-color: #333333;
+    box-shadow: 0px 1px 1px 1px #00d1b2;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Większy odstęp między sekcjami */
+}
+
+/* Nagłówek sekcji promocji */
+.promotion-header {
+    font-size: 2.5rem; /* Większy napis */
+    font-weight: bold;
+    color: #00d1b2; /* Turkusowy */
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Nazwa promocji */
+.promotion-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #ffcc00; /* Pastelowy żółty */
+    margin-bottom: 5px;
+}
+
+/* Daty promocji */
+.promotion-dates {
+    font-size: 1rem;
+    color: #1ecbe1; /* Turkusowy */
+    margin-bottom: 15px;
+}
+
+/* Kontener obrazów */
+.images-container {
+    display: flex;
+    flex-wrap: wrap; /* Obrazy zawijają się w wiersze */
+    gap: 15px; /* Odstęp między obrazami */
+    margin-bottom: 20px; /* Odstęp od sekcji "Dodaj obraz" */
+}
+
+/* Obrazy */
+.image-wrapper {
+    position: relative;
+    border-radius: 8px;
+    width: auto; /* Szerokość dostosowana automatycznie */
+    max-width: 120px; /* Maksymalna szerokość */
+    max-height: 100px; /* Maksymalna wysokość */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.promotion-image {
+    width: auto; /* Utrzymanie proporcji */
+    height: 100%; /* Dopasowanie wysokości */
+    object-fit: cover; /* Dopasowanie obrazu */
+    border-radius: 8px;
+    border: 2px solid #444444;
+}
+
+
+/* Przycisk usuwania obrazu */
+.delete-image-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%; /* Idealnie okrągły */
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    font-size: 1.2rem;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-image-btn:hover {
+    background-color: rgba(255, 0, 0, 1);
+}
+
+
+/* Sekcja "Dodaj obraz" */
+.promotion-form {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Odstęp między elementami */
+    flex-wrap: wrap; /* Zwijanie elementów, gdy brakuje miejsca */
+    margin-top: 20px; /* Odstęp od poprzednich sekcji */
+}
+
+.promotion-form label {
+    color: #f5f5f5;
+    font-size: 1rem;
+}
+
+.promotion-form input {
+    max-width: 250px;
+}
+
+/* Przyciski akcji */
+.promotion-buttons {
+    display: flex;
+    justify-content: flex-start;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+button {
+    font-size: 1rem;
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+/* Przyciski wyświetlania promocji */
+.toggle-promotions-button {
+    font-size: 1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Odstęp między ikoną a tekstem */
+}
+
+/* Sekcja promocji - dodanie cieni i odstępu */
+.promotion-section {
+    margin-top: 20px; /* Odstęp od przycisku */
+    padding: 20px; /* Wewnętrzny odstęp */
+    border-radius: 8px; /* Zaokrąglone rogi */
+    background-color: #292929; /* Ciemne tło */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Subtelny cień */
+}

@@ -1,0 +1,233 @@
+/* Karty restauracji */
+.restaurant-card {
+    border-radius: 16px;
+    background-color: #2b2b2b; /* Ciemne tło dla kart */
+    box-shadow: 0px 4px 10px rgb(0, 0, 0);
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.restaurant-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Nagłówek sekcji */
+.restaurant-header {
+    font-size: 2.5rem; /* Większy rozmiar */
+    font-weight: bold;
+    color: #00d1b2; /* Turkusowy */
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.restaurant-data {
+    display: flex;
+    flex-direction: column; /* Elementy ułożone w kolumnie */
+    gap: 5px; /* Większy odstęp między elementami */
+}
+
+
+.card-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #ffcc00; /* Pastelowy żółty */
+    padding-bottom: 20px; /* Wymuszenie większego odstępu */
+}
+
+
+
+.card-subtitle {
+    font-size: 1rem;
+    color: #1ecbe1; /* Turkusowy dla danych restauracji */
+}
+
+.card-subtitle span {
+    font-weight: bold;
+    color: #ffcc00; /* Żółty dla kluczowych danych */
+}
+
+/* Kategorie */
+.category-section {
+    margin-top: 20px;
+}
+
+.category-button {
+    background-color: #28a745; /* Zielony */
+    color: #ffffff; /* Biały tekst */
+    padding: 8px 12px; /* Zmniejszenie rozmiaru przycisku */
+    font-size: 0.9rem; /* Zmniejszenie czcionki */
+    border-radius: 6px; /* Zaokrąglenie krawędzi */
+    font-weight: bold; /* Wyróżnienie tekstu */
+    cursor: pointer; /* Wskazanie, że jest klikalny */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.category-button:hover {
+    background-color: #218838; /* Ciemniejszy zielony po najechaniu */
+    transform: scale(1.05); /* Delikatne powiększenie */
+}
+
+
+.category-badge {
+    display: inline-block;
+    padding: 8px 15px;
+    margin: 5px;
+    font-size: 0.9rem;
+    border-radius: 20px;
+    background-color: #444444;
+    color: #ffffff;
+    border: 1px solid #555555;
+    transition: background-color 0.3s, color 0.3s;
+    cursor: pointer;
+}
+
+
+.category-badge:hover {
+    background-color: #17a2b8;
+    color: #ffffff;
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+
+.category-selected {
+    background-color: #28a745;
+    color: #ffffff;
+}
+
+/* Przyciski */
+.button-container {
+    display: flex;
+    gap: 15px; /* Większy odstęp między przyciskami */
+}
+
+button {
+    font-size: 1rem;
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+button:focus {
+    outline: none;
+}
+
+button.btn-edit {
+    background-color: #007bff; /* Niebieski */
+}
+
+button.btn-edit:hover {
+    background-color: #0056b3;
+}
+
+button.btn-delete {
+    background-color: #dc3545; /* Czerwony */
+}
+
+button.btn-delete:hover {
+    background-color: #c82333;
+}
+
+/* Sekcja potwierdzenia */
+.confirmation-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    background-color: #222;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.confirmation-container p {
+    color: #f3f3f3;
+    margin: 0;
+}
+
+.confirm-btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.confirm-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: white;
+}
+
+.confirm-btn-yes {
+    background-color: #28a745;
+    border: none;
+}
+
+.confirm-btn-yes:hover {
+    background-color: #218838;
+}
+
+.confirm-btn-no {
+    background-color: #dc3545;
+    border: none;
+}
+
+.confirm-btn-no:hover {
+    background-color: #c82333;
+}
+
+/* Nagłówek nad kategoriami */
+.categories-header {
+    margin-top: 15px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #1ecbe1; /* Turkusowy kolor */
+    margin-bottom: 10px; /* Odstęp między nagłówkiem a kategoriami */
+}
+
+/* Kontener dla dodanych kategorii */
+.added-categories {
+    display: flex;
+    flex-wrap: wrap; /* Zawijanie elementów */
+    gap: 6px; /* Mniejsze odstępy między kategoriami */
+    margin-top: 5px;
+}
+
+/* Prostokąty kategorii */
+.category-rectangle {
+    display: flex;
+    align-items: center; /* Wyśrodkowanie tekstu w pionie */
+    justify-content: center; /* Wyśrodkowanie tekstu w poziomie */
+    width: 120px; /* Szerokość prostokąta */
+    height: 40px; /* Wysokość prostokąta */
+    background-color: #444444; /* Ciemne tło */
+    color: #ffffff; /* Biały tekst */
+    font-size: 0.8rem; /* Mniejszy rozmiar tekstu */
+    font-weight: bold;
+    border-radius: 4px; /* Minimalne zaokrąglenie */
+    text-align: center;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2); /* Delikatne cienie */
+}
+
+/* Bez efektu hover */
+.category-rectangle:hover {
+    background-color: #444444; /* Zachowaj ten sam kolor */
+    transform: none; /* Usuń skalowanie */
+    cursor: default; /* Usuń wskaźnik klikalności */
+}
+
+.section-separator {
+    border: none; /* Usuń domyślną ramkę */
+    border-top: 2px solid #1ecbe1; /* Turkusowy kolor kreski */
+    margin: 20px 0; /* Odstęp między sekcjami */
+    opacity: 0.7; /* Lekko przezroczysta */
+}
+

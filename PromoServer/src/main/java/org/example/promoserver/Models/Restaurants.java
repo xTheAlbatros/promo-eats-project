@@ -1,11 +1,13 @@
 package org.example.promoserver.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Map;
 
 @Entity
@@ -40,5 +42,20 @@ public class Restaurants {
     @JoinColumn(name = "owner_id")
     private Users users;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Promotions> promotions;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "restaurants", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RestaurantsCategories> restaurantsCategories;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "restaurants", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reviews> reviews;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "restaurants", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Favourites> favourites;
 
 }

@@ -1,6 +1,7 @@
 package org.example.promoserver.Restaurant.validator;
 
 import org.example.promoserver.Restaurant.dto.AddRestaurant;
+import org.example.promoserver.Restaurant.dto.UpdateRestaurant;
 import org.example.promoserver.Restaurant.exception.RestaurantBadRequestException;
 import org.springframework.util.StringUtils;
 
@@ -36,6 +37,38 @@ public class RestaurantValidator {
         }
     }
 
+    public static void validateUpdateRestaurant(UpdateRestaurant updateRestaurant) {
+        if (updateRestaurant.getId() == null) {
+            throw new RestaurantBadRequestException("Restaurant ID cannot be null");
+        }
+
+        // Validate provided fields
+        if (updateRestaurant.getName() != null && !StringUtils.hasText(updateRestaurant.getName())) {
+            throw new RestaurantBadRequestException("Restaurant name cannot be empty");
+        }
+
+        if (updateRestaurant.getPhone() != null) {
+            if (!StringUtils.hasText(updateRestaurant.getPhone())) {
+                throw new RestaurantBadRequestException("Phone number cannot be empty");
+            } else if (!isValidPhoneNumber(updateRestaurant.getPhone())) {
+                throw new RestaurantBadRequestException("Invalid phone number");
+            }
+        }
+
+        if (updateRestaurant.getEmail() != null) {
+            if (!StringUtils.hasText(updateRestaurant.getEmail())) {
+                throw new RestaurantBadRequestException("Email address cannot be empty");
+            } else if (!isValidEmail(updateRestaurant.getEmail())) {
+                throw new RestaurantBadRequestException("Invalid email address");
+            }
+        }
+
+        if (updateRestaurant.getOpeningHours() != null && !isValidOpeningHours(updateRestaurant.getOpeningHours())) {
+            throw new RestaurantBadRequestException("Invalid opening hours format");
+        }
+
+    }
+
     private static boolean isValidPhoneNumber(String phone) {
         return phone.matches("\\+?[0-9]{7,15}");
     }
@@ -60,4 +93,5 @@ public class RestaurantValidator {
     private static boolean isValidHours(String hours) {
         return hours.matches("^([01]\\d|2[0-3]):([0-5]\\d)-([01]\\d|2[0-3]):([0-5]\\d)$");
     }
+
 }
