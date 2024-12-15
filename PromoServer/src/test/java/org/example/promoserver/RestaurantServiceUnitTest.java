@@ -23,7 +23,10 @@ import org.mockito.*;
 import java.util.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-public class RestaurantServiceTest {
+/**
+ * Testy jednostkowe do testostowania serwisu restauracji
+ */
+public class RestaurantServiceUnitTest {
 
     @InjectMocks
     private RestaurantService restaurantService;
@@ -75,7 +78,6 @@ public class RestaurantServiceTest {
     // Test 3: Sprawdza metodę saveRestaurant() - dane poprawne
     @Test
     public void testSaveRestaurant_WithValidData() {
-        // Mock Principal (logowanie)
         Users user = new Users();
         user.setId(10);
         UsernamePasswordAuthenticationToken authentication = mock(UsernamePasswordAuthenticationToken.class);
@@ -108,7 +110,6 @@ public class RestaurantServiceTest {
         when(authentication.getPrincipal()).thenReturn(user);
 
         AddRestaurant addRestaurant = new AddRestaurant();
-        // brak wymaganych danych (np. name)
 
         assertThrows(RestaurantBadRequestException.class, () -> {
             restaurantService.saveRestaurant(addRestaurant, authentication);
