@@ -1,1 +1,2 @@
 CREATE SCHEMA IF NOT EXISTS promo_eats;
+CREATE SCHEMA IF NOT EXISTS promo_eats_test;
