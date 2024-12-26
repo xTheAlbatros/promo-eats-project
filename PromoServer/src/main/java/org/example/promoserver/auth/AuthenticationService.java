@@ -35,10 +35,9 @@ public class AuthenticationService {
     @Transactional
     public AuthenticationResponse register(RegisterUser registerUser) {
         var user = userService.registerUser(registerUser);
-        var savedUser = repository.save(user);
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
-        saveUserToken(savedUser, jwtToken);
+        saveUserToken(user, jwtToken);
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)

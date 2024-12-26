@@ -2,6 +2,7 @@ package org.example.promoserver.Restaurant;
 
 import org.example.promoserver.Models.Restaurants;
 import org.example.promoserver.Restaurant.dto.AddRestaurant;
+import org.example.promoserver.Restaurant.dto.UpdateRestaurant;
 import org.example.promoserver.Restaurant.dto.ViewRestaurant;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -24,4 +25,5 @@ public interface RestaurantMapper {
     Restaurants mapViewToRestaurants(ViewRestaurant viewRestaurant);
 
     ViewRestaurant mapRestaurantsToView(Restaurants restaurants);
+
 }
